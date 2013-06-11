@@ -27,8 +27,25 @@
     return event;
   };
 
+  var recordDOMMutationEvents = function(){
+    var observer = new MutationSummary({
+      callback: function(summaries){
+        console.log(summaries);
+      },
+      queries: [{ 
+        element: "*"
+      },
+      {
+        attribute:"style"
+      }]
+    });
+  };
+  var playDOMMutationEvents = function(){};
+
   function registerEventHandlers(){
     // handle DOM Mutation events
+    recordDOMMutationEvents();
+
     // handle mouse movements
     // handle keyboard events
     // handle text selection events
@@ -44,7 +61,13 @@
     // TODO: handle video playback events for youtube and vimeo
   };
 
+  function removeEventHandlers(){
+
+  };
+
   var screenjs = {};
+
+  screenjs.recording = false;
 
   screenjs.record = function(options){
     options = options || {};
@@ -58,12 +81,34 @@
     var eventData = {
       html: getPageHTMLWithCSS(),
       height: $(window).height(),
-      width: $(window).height()
+      width: $(window).width()
     };
 
     events.push(createEvent(eventType, eventData));
 
-    console.log(events);
+    registerEventHandlers();
+
+    screenjs.recording = true;
+  };
+
+  screenjs.stopRecording = function(){
+    removeEventHandlers();
+    screenjs.recording = false;
+  };
+
+  screenjs.play = function(options){
+    var events = options.events;
+
+    var eventData = events[0];
+
+    var frame = $("<iframe></iframe>");
+    frame.css({
+      width: eventData.width,
+      height: eventData.height
+    });
+
+    frame[0].contentDocument.write(eventData.html);
+
   };
 
   window.screenjs = screenjs;
