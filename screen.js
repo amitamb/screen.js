@@ -31,6 +31,13 @@
     var observer = new MutationSummary({
       callback: function(summaries){
         console.log(summaries);
+        for(var i=0,len=summaries.length;i<len;i++){
+          var summary=summaries[i];
+          if (summary.added.length > 0) {
+            // element added
+            
+          }
+        }
       },
       queries: [{ 
         element: "*"
