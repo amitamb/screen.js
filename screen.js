@@ -7,6 +7,8 @@
   screenjs.events = [];
 
   screenjs.recording = false;
+  screenjs.playing = false;
+
   screenjs.debug = true;
 
   function getPageHTMLWithCSS(){
@@ -170,7 +172,7 @@
   };
 
   function removeEventHandlers(){
-
+    $("*").off(".screenjs");
   };
 
   screenjs.record = function(options){
@@ -179,8 +181,6 @@
       console.log(event);
     };
 
-    var events = [];
-
     var eventType = "start";
     var eventData = {
       html: getPageHTMLWithCSS(),
@@ -188,7 +188,7 @@
       width: $(window).width()
     };
 
-    events.push(createEvent(eventType, eventData));
+    appendEvent(eventType, eventData);
 
     registerEventHandlers();
 
@@ -198,21 +198,34 @@
   screenjs.stopRecording = function(){
     removeEventHandlers();
     screenjs.recording = false;
+    var events = screenjs.events;
+    screenjs.events = [];
+    return events;
   };
 
   screenjs.play = function(options){
+    var playFrame = options.playFrame;
     var events = options.events;
 
-    var eventData = events[0];
+    var eventData = events[0].data;
 
-    var frame = $("<iframe></iframe>");
-    frame.css({
-      width: eventData.width,
-      height: eventData.height
-    });
+    console.log(events);
 
-    frame[0].contentDocument.write(eventData.html);
+    // var frame = $("<iframe></iframe>");
+    // frame.css({
+    //   width: eventData.width,
+    //   height: eventData.height
+    // });
 
+    // frame[0].contentDocument.write(eventData.html);
+
+    playFrame.contentDocument.write(eventData.html);
+
+    screenjs.playing = true;
+  };
+
+  screenjs.stopPlaying = function(){
+    screenjs.playing = false;
   };
 
   window.screenjs = screenjs;

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="init.js"></script>
+    <script src="dom.js"></script>
+    <script src="mutation_summary.js"></script>
+    <script src="screen.js"></script>
+
+    <script>
+      screenjs$(function(){
+        // window.screenjs.record();
+      });
+    </script>
+
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script>
+      $(function(){
+        var frame = $("#playFrame")[0];
+        $("#play").on("click", function(){
+          window.screenjs.play({
+            playFrame: frame,
+            events: JSON.parse(localStorage.events)
+          });
+        });
+        $("#stopPlaying").on("click", function(){
+          window.screenjs.stopPlaying();
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <button id="play">Play</button>
+    <button id="stopPlaying">Stop</button>
+    <br />
+    <iframe id="playFrame" src="about:blank" style="width:1000px;height:520px;border:1px solid #222;"></iframe>
+  </body>
+</html>

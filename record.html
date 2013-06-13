@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script>
+      $(function(){
+        var frame = $("#recordFrame")[0];
+        $("#record").on("click", function(){
+          frame.contentWindow.screenjs.record()
+        });
+        $("#stopRecording").on("click", function(){
+          localStorage.events = JSON.stringify(frame.contentWindow.screenjs.stopRecording());
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <button id="record">Record</button>
+    <button id="stopRecording">Stop</button>
+    <br />
+    <iframe id="recordFrame" src="simple_test.html" style="width:1000px;height:520px;border:1px solid #222;"></iframe>
+  </body>
+</html>
