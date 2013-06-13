@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="init.js"></script>
+    <script src="dom.js"></script>
+    <script src="mutation_summary.js"></script>
+    <script src="screen.js"></script>
+
+    <script>
+      screenjs$(function(){
+        window.screenjs.record();
+      });
+    </script>
+
+    <!-- This will be used by test page -->
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script>
+      $(function(){
+        $("#stopPropagation1").on("click", function(event){
+          event.stopPropagation();
+          return false;
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div style="width:300px;height:200px;background-color:Red;padding:20px;">
+      Show some simple content here
+      <br /><br />
+      <button>Click on this button</button>
+      <div id="stopPropagation1" style="margin:10px 30px;background-color:Blue;height:30px;">
+        Using stopPropagation here
+      </div>
+    </div>
+  </body>
+</html>

@@ -2,6 +2,13 @@
 
 (function($){
 
+  var screenjs = {};
+
+  screenjs.events = [];
+
+  screenjs.recording = false;
+  screenjs.debug = true;
+
   function getPageHTMLWithCSS(){
     var re = /<script\b[^>]*>([\s\S]*?)<\/script>/gm;
     var htmlElem = $("html").clone();
@@ -24,7 +31,19 @@
     event.type = eventType;
     event.data = eventData;
 
+    if (screenjs.debug) {
+      //console.log(event);
+    }
+
     return event;
+  };
+
+  function appendEvent(eventType, eventData){
+    screenjs.events.push(createEvent(eventType, eventData));
+  };
+
+  function checkEventType(event, expectedType){
+    return event.type == expectedType;
   };
 
   var recordDOMMutationEvents = function(){
@@ -49,11 +68,93 @@
   };
   var playDOMMutationEvents = function(){};
 
+  var recordMouseEvents = function(){
+    // mouse movements
+    $(document).on("mousemove.screenjs", function(event){
+      appendEvent(
+        "mousemove",
+        {
+          pageX: event.pageX,
+          pageY: event.pageY
+        }
+      );
+    });
+    // mouse events
+    $("*").on("mousedown.screenjs", function(event){
+      if ( this == event.target ) {
+        console.log("mousedown event called");
+        appendEvent(
+          "mousedown",
+          {
+            pageX: event.pageX,
+            pageY: event.pageY
+          }
+        );
+      }
+    });
+    $("*").on("mouseup.screenjs", function(event){
+      if ( this == event.target ) {
+        console.log("mouseup event called");
+        appendEvent(
+          "mouseup",
+          {
+            pageX: event.pageX,
+            pageY: event.pageY
+          }
+        );
+      }
+    });
+  };
+  var playMouseEvents = function(event){
+    if ( checkEventType(event, "mouseMove") ) {
+      // TODO: change position of mouse image on page
+      // TODO: Show mousedown event
+      // TODO: Show mouseup event
+    }
+  };
+
+  var recordKeyboardEvents = function(){
+    // TODO : Later
+  };
+  var playKeyboardEvents = function(){
+    // TODO : Later
+  };
+
+  var recordContentSelectionEvents = function(){
+
+  };
+  var playContentSelectionEvents = function(){
+
+  };
+
+  var recordFormSubmitEvents = function(){
+
+  };
+  var playFormSubmitEvents = function(){
+    
+  };
+
+  var recordNavigationEvents = function(){
+
+  };
+  var playNavigationEvents = function(){
+    
+  };
+
+  var recordMiscEvents = function(){
+    // track scrolling
+  };
+  var playMiscEvents = function(){
+    // play scrolling
+  };  
+
   function registerEventHandlers(){
     // handle DOM Mutation events
     recordDOMMutationEvents();
 
     // handle mouse movements
+    recordMouseEvents();
+
     // handle keyboard events
     // handle text selection events
     // handle form submition event
@@ -71,10 +172,6 @@
   function removeEventHandlers(){
 
   };
-
-  var screenjs = {};
-
-  screenjs.recording = false;
 
   screenjs.record = function(options){
     options = options || {};
