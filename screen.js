@@ -4,12 +4,37 @@
 
   var screenjs = {};
 
-  screenjs.events = [];
+  screenjs.events = []; // for recording and playing
+
+  screenjs.playFrame = null;
 
   screenjs.recording = false;
   screenjs.playing = false;
 
   screenjs.debug = true;
+
+  var getPlayFrameScreenjs = function(){
+    return screenjs.playFrame.contentWindow.screenjs;
+  };
+
+  screenjs.mouseCursor = $("<img></img>");
+  screenjs.mouseCursor.attr("src", "mouse4.png").css({
+    position:"absolute",
+    display:"block",
+    left:"-500px",
+    top:"-500px"
+  });
+  $(function(){
+    screenjs.mouseCursor.appendTo("body");
+  });
+
+  function loadScriptInPlayFrame(filename){
+    var frameDocument = screenjs.playFrame.contentDocument;
+    var scriptRef = frameDocument.createElement('script');
+    scriptRef.setAttribute("type","text/javascript");
+    scriptRef.setAttribute("src", filename);
+    frameDocument.getElementsByTagName("head")[0].appendChild(scriptRef)
+  };
 
   function getPageHTMLWithCSS(){
     var re = /<script\b[^>]*>([\s\S]*?)<\/script>/gm;
@@ -46,6 +71,11 @@
 
   function checkEventType(event, expectedType){
     return event.type == expectedType;
+  };
+
+  function getNextEvent(){
+    screenjs.currentEventIndex++;
+    return screenjs.events[screenjs.currentEventIndex];
   };
 
   var recordDOMMutationEvents = function(){
@@ -108,11 +138,14 @@
     });
   };
   var playMouseEvents = function(event){
-    if ( checkEventType(event, "mouseMove") ) {
+    if ( checkEventType(event, "mousemove") ) {
       // TODO: change position of mouse image on page
-      // TODO: Show mousedown event
-      // TODO: Show mouseup event
+      var eventData = event.data;
+      // TODO: Make sure it works in IE
+      getPlayFrameScreenjs().setMousePosition(eventData.pageX, eventData.pageY);
     }
+    // TODO: Show mousedown event
+    // TODO: Show mouseup event
   };
 
   var recordKeyboardEvents = function(){
@@ -203,13 +236,45 @@
     return events;
   };
 
+  screenjs.playEvent = function(event){
+    if ( checkEventType(event, "mousemove") ) {
+      playMouseEvents(event);
+    }
+  };
+
+  screenjs.startEventLoop = function(){
+    var frameRate = 100;
+    var interval = 1000 / frameRate;
+    var $playFrame = $(screenjs.playFrame);
+    screenjs.playFrame.left = 0;
+    screenjs.playFrame.top = 0;
+    screenjs.intervalId = setInterval(function(){
+      // console.log("Inside interval");
+      var curTime = Number(new Date());
+      var curTimeOffset = curTime - screenjs.startPlayTime;
+      var event = null;
+      while ( event = getNextEvent() ){
+        var eventOffset = event.time - screenjs.startEventTime;
+        screenjs.playEvent(event);
+        if ( eventOffset >= curTimeOffset ) {
+          break;
+        }
+      }
+      if (!event) {
+        screenjs.stopPlaying();
+      }
+    }, interval);
+    console.log("Interval created ID: " + screenjs.intervalId);
+  };
+
   screenjs.play = function(options){
-    var playFrame = options.playFrame;
-    var events = options.events;
 
-    var eventData = events[0].data;
+    screenjs.playFrame = options.playFrame;
+    screenjs.events = options.events;
+    screenjs.currentEventIndex = -1;
 
-    console.log(events);
+    var event = getNextEvent();
+    var eventData = screenjs.events[0].data;
 
     // var frame = $("<iframe></iframe>");
     // frame.css({
@@ -219,13 +284,29 @@
 
     // frame[0].contentDocument.write(eventData.html);
 
-    playFrame.contentDocument.write(eventData.html);
+    screenjs.playFrame.src = "about:blank";
+    setTimeout(function(){
+      screenjs.playFrame.contentDocument.write(eventData.html);
+      loadScriptInPlayFrame("http://code.jquery.com/jquery-1.9.1.min.js");
+      loadScriptInPlayFrame("init.js");
+      loadScriptInPlayFrame("play.js");
 
-    screenjs.playing = true;
+      // TODO: Wait for play.js to load and then continue
+      // imnprove it from simple setTimeout
+      setTimeout(function(){
+        screenjs.startPlayTime = Number(new Date());
+        screenjs.startEventTime = event.time;
+        screenjs.playing = true;
+
+        screenjs.startEventLoop();
+      }, 20);
+    }, 10)
   };
 
   screenjs.stopPlaying = function(){
     screenjs.playing = false;
+    console.log("Interval cleared : " + screenjs.intervalId);
+    clearInterval(screenjs.intervalId);
   };
 
   window.screenjs = screenjs;
