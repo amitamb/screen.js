@@ -5,11 +5,15 @@
     <script src="init.js"></script>
     <script src="dom.js"></script>
     <script src="mutation_summary.js"></script>
+    <script src="tree_mirror.js"></script>
     <script src="screen.js"></script>
 
     <script>
       screenjs$(function(){
         // window.screenjs.record();
+        $("#domChanger").click(function(){
+          $("#mainContainer").prepend("<span>I got added to the dom<br /></span>")
+        });
       });
     </script>
 
@@ -25,10 +29,10 @@
     </script>
   </head>
   <body>
-    <div style="width:300px;height:200px;background-color:Red;padding:20px;">
+    <div id="mainContainer" style="width:300px;height:200px;background-color:Red;padding:20px;">
       Show some simple content here
       <br /><br />
-      <button>Click on this button</button>
+      <button id="domChanger">Click on this button</button>
       <div id="stopPropagation1" style="margin:10px 0;background-color:Blue;height:30px;">
         Using stopPropagation here
       </div>

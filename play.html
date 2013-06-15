@@ -16,10 +16,12 @@
     <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
     <script>
       $(function(){
-        var frame = $("#playFrame")[0];
+        // var frame = $("#playFrame")[0];
+        var playerContainer = $("#playerContainer")[0];
         $("#play").on("click", function(){
           window.screenjs.play({
-            playFrame: frame,
+            // playFrame: frame,
+            playerContainer: playerContainer,
             events: JSON.parse(localStorage.events)
           });
         });
@@ -33,6 +35,10 @@
     <button id="play">Play</button>
     <button id="stopPlaying">Stop</button>
     <br />
+    <div id="playerContainer" style="width:1000px;height:520px;border:1px solid #222;">
+    </div>
+    <!--
     <iframe id="playFrame" src="about:blank" style="width:1000px;height:520px;border:1px solid #222;"></iframe>
+    -->
   </body>
 </html>
