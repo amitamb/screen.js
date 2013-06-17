@@ -101,7 +101,7 @@
 
   var recordDOMMutationEvents = function(){
 
-    var mirrorClient = new TreeMirrorClient(document, {
+    screenjs.mirrorClient = new TreeMirrorClient(document, {
       initialize: function(rootId, children) {
         appendEvent("DOMMutation", {
           f: 'initialize',
@@ -119,6 +119,7 @@
     });
 
   };
+
   var playDOMMutationEvents = function(event){
     if ( checkEventType(event, "DOMMutation") ) {
       var eventData = event.data;
@@ -128,12 +129,15 @@
 
   var recordMouseEvents = function(){
     // mouse movements
+
+    var $window = $(window);
+
     $(document).on("mousemove.screenjs", function(event){
       appendEvent(
         "mousemove",
         {
-          pageX: event.pageX,
-          pageY: event.pageY
+          pageX: event.pageX - $window.scrollLeft(),
+          pageY: event.pageY - $window.scrollTop()
         }
       );
     });
@@ -235,9 +239,28 @@
 
   var recordMiscEvents = function(){
     // track scrolling
+    // TODO: Track scrolling event inside a div
+    var scrollHandler = function(domEvent){
+      console.log(screenjs.mirrorClient.serializeNode(domEvent.target));
+      if ( this == domEvent.target ) {
+
+        appendEvent("scroll",
+        {
+          nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
+          scrollTop: $(this).scrollTop(),
+          scrollLeft: $(this).scrollLeft()
+        });
+      }
+    };
+    $(document).on("scroll.screenjs", scrollHandler);
+    $("*").on("scroll.screenjs", scrollHandler);
   };
-  var playMiscEvents = function(){
+  var playMiscEvents = function(event){
     // play scrolling
+    if ( checkEventType(event, "scroll") ) {
+      var eventData = event.data;
+      getPlayFrameScreenjs().scroll(eventData);
+    }
   };  
 
   function registerEventHandlers(){
@@ -252,6 +275,8 @@
     // handle form submition event
     // handle navigation event i.e. unloading of page
 
+    recordMiscEvents();
+
     // TODO: Investigate how to record mouseover event for
     // elements which use :hover, :active pseudo-elements
     // may be querying for styles on mouseenter and 
@@ -262,6 +287,7 @@
   };
 
   function removeEventHandlers(){
+    $(document).off(".screenjs");
     $("*").off(".screenjs");
   };
 
@@ -300,6 +326,9 @@
     }
     else if ( checkEventType(event, "DOMMutation") ) {
       playDOMMutationEvents(event);
+    }
+    else {
+      playMiscEvents(event);
     }
     return event.time;
   };
@@ -397,7 +426,7 @@
       loadScriptInPlayFrame("init.js");
       loadScriptInPlayFrame("mutation_summary.js");
       loadScriptInPlayFrame("tree_mirror.js");
-      loadScriptInPlayFrame("play.js?a4");
+      loadScriptInPlayFrame("play.js?a7");
 
       // TODO: Wait for play.js to load and then continue
       // imnprove it from simple setTimeout

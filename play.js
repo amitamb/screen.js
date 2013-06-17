@@ -64,10 +64,16 @@
   }
 
   screenjs.handleDOMMutation = function(data){
-    screenjs.mirror
+    //screenjs.mirror
     console.log(data);
     data.args = JSON.parse(data.args);
     handleMessage(data);
+  };
+
+  screenjs.scroll = function(eventData){
+    var node = screenjs.mirror.deserializeNode(eventData.nodeId);
+    $(node).scrollLeft(eventData.scrollLeft);
+    $(node).scrollTop(eventData.scrollTop);
   };
 
   clearPage();
