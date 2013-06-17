@@ -152,6 +152,23 @@
             pageY: event.pageY - $window.scrollTop()
           }
         );
+        // TODO : Need to investigate this more
+        // but mouseup doesn't get called for select
+        // so this is a workaround
+        if ( $(this).is("select") && $.browser.webkit ) {
+          console.log("Forced mouseup");
+          (function(event, $window){
+            //setTimeout(function(){
+              appendEvent(
+                "mouseup",
+                {
+                  pageX: event.pageX - $window.scrollLeft(),
+                  pageY: event.pageY - $window.scrollTop()
+                }
+              );
+            //}, 100);
+          })(event, $window);
+        }
       }
     });
     $("*").on("mouseup.screenjs", function(event){
@@ -256,7 +273,9 @@
   };
 
   var recordFormEvents = function(){
-    $("input").on("change.screenjs", function(domEvent){
+    // TODO: There are some major issues with select
+    // need to fix them
+    $("input,select,textarea").on("change.screenjs paste.screenjs", function(domEvent){
       console.log("Change change event");
       if ( this == domEvent.target ) {
         console.log("Recording event called");
@@ -422,10 +441,13 @@
 
     function playNextEvent(eventIndex){
       var event = screenjs.events[eventIndex];
-      var nextEvent = screenjs.events[eventIndex+1];
+      var prevEvent = screenjs.events[eventIndex-1];
 
-      if (nextEvent && screenjs.playing){
-        var timeDiff = nextEvent.time - event.time;
+      if (event && screenjs.playing){
+        var timeDiff = 0;
+        if (prevEvent) { // which shoulbe be true always except for 1st
+          timeDiff = event.time - prevEvent.time;
+        }
         screenjs.timeoutId = setTimeout(function(){
           screenjs.playEvent(event);
           playNextEvent(eventIndex+1);
