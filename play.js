@@ -76,6 +76,18 @@
     $(node).scrollTop(eventData.scrollTop);
   };
 
+  screenjs.changeElementValue = function(eventData) {
+    var node = screenjs.mirror.deserializeNode(eventData.nodeId);
+    var val = eventData.value;
+    var $node = $(node);
+    if ( $node.is("input[type=radio]") ) {
+      $node.prop("checked", val)
+    }
+    else {
+      $node.val(val);
+    }
+  }
+
   clearPage();
 
   showMouseImages();

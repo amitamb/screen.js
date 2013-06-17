@@ -211,9 +211,28 @@
 
   var recordKeyboardEvents = function(){
     // TODO : Later
+    $("*").on("keypress.screenjs", function(domEvent){
+      if ( this == domEvent.target ) {
+        // This is needed only for keypress
+        // but won't hurt for other events
+        (function(domEvent, that){
+          setTimeout(function(){
+            appendEvent("keypress",
+            {
+              nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
+              value: $(domEvent.target).val()
+            });
+          }, 0);
+        })(domEvent, this);
+      }
+    });
   };
-  var playKeyboardEvents = function(){
+  var playKeyboardEvents = function(event){
     // TODO : Later
+    console.log(event);
+    if ( checkEventType(event, "keypress") ) {
+      getPlayFrameScreenjs().changeElementValue(event.data);
+    }
   };
 
   var recordContentSelectionEvents = function(){
@@ -223,11 +242,34 @@
 
   };
 
-  var recordFormSubmitEvents = function(){
+  var recordFormEvents = function(){
+    $("input").on("change.screenjs", function(domEvent){
+      console.log("Change change event");
+      if ( this == domEvent.target ) {
+        console.log("Recording event called");
+        var $element = $(domEvent.target);
+        var val = $element.val();
 
+        if ( $(domEvent.target).is("input[type=radio]") ) {
+          if ( $element.is(":checked") ) {
+            val = true;
+          }
+          else {
+            val = false;
+          }
+        }
+        appendEvent("change",
+        {
+          nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
+          value: val
+        });
+      }
+    });
   };
-  var playFormSubmitEvents = function(){
-    
+  var playFormEvents = function(event){
+    if ( checkEventType(event, "change") ) {
+      getPlayFrameScreenjs().changeElementValue(event.data);
+    }
   };
 
   var recordNavigationEvents = function(){
@@ -271,8 +313,10 @@
     recordMouseEvents();
 
     // handle keyboard events
+    recordKeyboardEvents();
     // handle text selection events
     // handle form submition event
+    recordFormEvents();
     // handle navigation event i.e. unloading of page
 
     recordMiscEvents();
@@ -326,6 +370,12 @@
     }
     else if ( checkEventType(event, "DOMMutation") ) {
       playDOMMutationEvents(event);
+    }
+    else if ( checkEventType(event, ["keypress"]) ) {
+      playKeyboardEvents(event);
+    }
+    else if ( checkEventType(event, ["change"]) ) {
+      playFormEvents(event);
     }
     else {
       playMiscEvents(event);
@@ -426,7 +476,7 @@
       loadScriptInPlayFrame("init.js");
       loadScriptInPlayFrame("mutation_summary.js");
       loadScriptInPlayFrame("tree_mirror.js");
-      loadScriptInPlayFrame("play.js?a7");
+      loadScriptInPlayFrame("play.js?a9");
 
       // TODO: Wait for play.js to load and then continue
       // imnprove it from simple setTimeout
