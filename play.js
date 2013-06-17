@@ -48,31 +48,6 @@
     }
   });
 
-  screenjs.setMousePosition = function(left, top){
-    // screenjs.mouseCursor.
-    screenjs.mouseCursor.css({
-      left: left,
-      top: top
-    });
-  };
-
-  screenjs.setMouseStatus = function(left, top, mouseDown){
-    if (mouseDown) {
-      screenjs.clickCircle.css({
-        left: left - 16,
-        top: top - 16,
-        display: "block"
-      });
-    }
-    else {
-      screenjs.clickCircle.css({
-        left: "-500px",
-        top: "-500px",
-        display: "none"
-      });
-    }
-  };
-
   function clearPage() {
     while (document.firstChild) {
       document.removeChild(document.firstChild);

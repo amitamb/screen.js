@@ -47,11 +47,14 @@
       display:"block",
       left:"-500px",
       top:"-500px",
+      opacity:"0.5",
       "z-index":"9999"
     }).appendTo(screenjs.frameOverlay);
     // page will be already loaded so no need to wait for page load
     // as play.js is added after some HTML is written to page
 
+    // TODO: Show different cursor as user moves over links
+    // and input boxes
     screenjs.mouseCursor = $("<img></img>");
     screenjs.mouseCursor.attr("src", "mouse4.png").css({
       position:"absolute",
@@ -394,7 +397,7 @@
       loadScriptInPlayFrame("init.js");
       loadScriptInPlayFrame("mutation_summary.js");
       loadScriptInPlayFrame("tree_mirror.js");
-      loadScriptInPlayFrame("play.js?a3");
+      loadScriptInPlayFrame("play.js?a4");
 
       // TODO: Wait for play.js to load and then continue
       // imnprove it from simple setTimeout
