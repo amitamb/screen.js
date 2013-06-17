@@ -148,8 +148,8 @@
         appendEvent(
           "mousedown",
           {
-            pageX: event.pageX,
-            pageY: event.pageY
+            pageX: event.pageX - $window.scrollLeft(),
+            pageY: event.pageY - $window.scrollTop()
           }
         );
       }
@@ -160,8 +160,8 @@
         appendEvent(
           "mouseup",
           {
-            pageX: event.pageX,
-            pageY: event.pageY
+            pageX: event.pageX - $window.scrollLeft(),
+            pageY: event.pageY - $window.scrollTop()
           }
         );
       }
@@ -183,6 +183,13 @@
           display: "block"
         });
       }
+      else {
+        screenjs.clickCircle.css({
+          left: "-500px",
+          top: "-500px",
+          display: "none"
+        });
+      }
       // getPlayFrameScreenjs().setMousePosition(eventData.pageX, eventData.pageY);
     }
     else if ( checkEventType(event, "mousedown") ) {
@@ -198,13 +205,19 @@
     }
     else if ( checkEventType(event, "mouseup") ) {
       console.log("mouseup found");
-      screenjs.isMouseDown = false
-      var eventData = event.data;
-      screenjs.clickCircle.css({
-        left: "-500px",
-        top: "-500px",
-        display: "none"
-      });
+      screenjs.isMouseDown = false;
+      (function(eventData){
+        // TODO: Hide click circle when mouse moves i.e. make it better
+        setTimeout(function(){
+          if ( screenjs.isMouseDown == false ) {
+            screenjs.clickCircle.css({
+              left: "-500px",
+              top: "-500px",
+              display: "none"
+            });
+          }
+        }, 200)
+      })(event.data);
       // getPlayFrameScreenjs().setMouseStatus(eventData.pageX, eventData.pageY, false);
     }
   };
