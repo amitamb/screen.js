@@ -250,7 +250,7 @@
         var $element = $(domEvent.target);
         var val = $element.val();
 
-        if ( $(domEvent.target).is("input[type=radio]") ) {
+        if ( $element.is("input[type=radio]") || $element.is("input[type=checkbox]") ) {
           if ( $element.is(":checked") ) {
             val = true;
           }
@@ -476,7 +476,7 @@
       loadScriptInPlayFrame("init.js");
       loadScriptInPlayFrame("mutation_summary.js");
       loadScriptInPlayFrame("tree_mirror.js");
-      loadScriptInPlayFrame("play.js?a9");
+      loadScriptInPlayFrame("play.js?a10");
 
       // TODO: Wait for play.js to load and then continue
       // imnprove it from simple setTimeout

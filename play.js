@@ -80,7 +80,7 @@
     var node = screenjs.mirror.deserializeNode(eventData.nodeId);
     var val = eventData.value;
     var $node = $(node);
-    if ( $node.is("input[type=radio]") ) {
+    if ( $node.is("input[type=radio]") || $node.is("input[type=checkbox]") ) {
       $node.prop("checked", val)
     }
     else {
