@@ -98,6 +98,26 @@
     node.selectionEnd = eventData.selectionEnd;
   };
 
+  screenjs.handleContentselect = function(eventData) {
+    if ( eventData.clear == true ) {
+      var selectionObject = window.getSelection();
+      if(selectionObject.rangeCount > 0) selectionObject.removeAllRanges();
+    }
+    else {
+      var range = document.createRange();
+      var startNode = screenjs.mirror.deserializeNode(eventData.startNodeId);
+      var endNode = screenjs.mirror.deserializeNode(eventData.endNodeId);
+      $(window).focus();
+      // startNode.focus();
+
+      range.setStart(startNode, eventData.startNodeOffset);
+      range.setEnd(endNode, eventData.endNodeOffset);
+      var selectionObject = window.getSelection();
+      if(selectionObject.rangeCount > 0) selectionObject.removeAllRanges();
+      selectionObject.addRange(range);
+    }
+  };
+
   clearPage();
 
   showMouseImages();

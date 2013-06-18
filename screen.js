@@ -291,6 +291,10 @@
 
   var recordSelectionEvents = function(){
 
+    // TODO: Decide if we can handle focus events here
+    // and even we need to
+    // Need more effort on this front
+
     // for input and textarea
     function recordSelection(input_field){
       var start = input_field.selectionStart;
@@ -300,15 +304,16 @@
       }
     }
 
+    // TODO: Handle a possible bug here
+    // clear this lastEvent when element gets deselected
     var lastInputselectEventData = null;
     var lastInputselectElement = null;
 
     // First record input and textarea selection
     // for it need to track mouse movements
-    $(document).on("mousemove.screenjs", function(domEvent){
+    $(":input").on("mousemove.screenjs", function(domEvent){
       if ( screenjs.isMouseDown ) {
         console.log("Selection event");
-        console.log(window.getSelection());
         var eventData = {
           nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
           selectionStart: event.target.selectionStart,
@@ -326,7 +331,6 @@
     // also use general select event
     $(":input").on("select.screenjs  mouseup.screenjs", function(domEvent){
       console.log("Selection event 2");
-      console.log(window.getSelection());
       var eventData = {
         nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
         selectionStart: event.target.selectionStart,
@@ -346,9 +350,7 @@
 
       // This mouseup is used to capture deselection when user clicks outside or event inside of
       // the textarea or input
-
       console.log("Selection event 3");
-      console.log(window.getSelection());
 
       if ( lastInputselectElement ) {
         var eventData = {
@@ -362,12 +364,85 @@
         }
       }
     });
+
+    // Now handle content selection
+
+    // TODO: Handle a possible bug here as well
+    // clear this lastEvent when element gets deselected
+    var lastContentselectEventData = null;
+
+    function getRangeObject(selectionObject) {
+      if (selectionObject.getRangeAt)
+        return selectionObject.getRangeAt(0);
+      else { // Safari!
+        var range = document.createRange();
+        range.setStart(selectionObject.anchorNode,selectionObject.anchorOffset);
+        range.setEnd(selectionObject.focusNode,selectionObject.focusOffset);
+        return range;
+      }
+    }
+
+    // TODO: Figure out how to handle stopped bubbling
+    // of mousedown and mouseup
+    $(document).on("mousemove.screenjs mousedown.screenjs mouseup.screenjs", function(domEvent){
+      if ( screenjs.isMouseDown || domEvent.type == "mousedown" || domEvent.type == "mouseup" ) {
+        console.log("Content Selection event");
+        var selectionObject = window.getSelection()
+        if ( selectionObject.rangeCount > 0 ) {
+          rangeObject = getRangeObject(selectionObject);
+          var eventData = {
+            startNodeId: screenjs.mirrorClient.serializeNode(rangeObject.startContainer),
+            startNodeOffset: rangeObject.startOffset,
+            endNodeId: screenjs.mirrorClient.serializeNode(rangeObject.endContainer),
+            endNodeOffset: rangeObject.endOffset
+          };
+          if ( lastContentselectEventData != eventData ) {
+            console.log(eventData);
+            console.log(lastContentselectEventData);
+            appendEvent("contentselect", eventData);
+            lastContentselectEventData = eventData;
+          }
+        }
+        else {
+          console.log("Clear selection all *******");
+          if ( lastContentselectEventData ) {
+            var eventData = {
+              clear: true
+            };
+            appendEvent("contentselect", eventData);
+            lastContentselectEventData = null;
+          }
+        }
+      }
+    });
+
+    // $(document).on("mousedown.screenjs", function(domEvent){
+    //   // This mouseup is used to capture deselection when user clicks outside or event inside of
+    //   // the textarea or input
+    //   console.log("Content Selection event 2");
+
+    //   if ( lastInputselectElement ) {
+    //     var eventData = {
+    //     nodeId: screenjs.mirrorClient.serializeNode(lastInputselectElement),
+    //     selectionStart: lastInputselectElement.selectionStart,
+    //     selectionEnd: lastInputselectElement.selectionEnd
+    //     };
+    //     if ( lastInputselectEventData != eventData ) {
+    //       appendEvent("inputselect", eventData);
+    //       lastInputselectEventData = eventData;
+    //     }
+    //   }
+    // });
+
   };
   var playSelectionEvents = function(event){
     if ( checkEventType(event, "inputselect") ) {
       // TODO: Consider using a generic way of calling such handlers rather than a seperate
       // function for each event
       getPlayFrameScreenjs().handleInputselect(event.data);
+    } else if ( checkEventType(event, "contentselect") ) {
+      console.log(event.data);
+      getPlayFrameScreenjs().handleContentselect(event.data);
     }
   };
 
@@ -516,7 +591,7 @@
     else if ( checkEventType(event, ["keypress"]) ) {
       playKeyboardEvents(event);
     }
-    else if ( checkEventType(event, ["inputselect"]) ) {
+    else if ( checkEventType(event, ["inputselect", "contentselect"]) ) {
       playSelectionEvents(event);
     }
     else if ( checkEventType(event, ["change"]) ) {
@@ -624,7 +699,7 @@
       loadScriptInPlayFrame("init.js");
       loadScriptInPlayFrame("mutation_summary.js");
       loadScriptInPlayFrame("tree_mirror.js");
-      loadScriptInPlayFrame("play.js?a11");
+      loadScriptInPlayFrame("play.js?a16");
 
       // TODO: Wait for play.js to load and then continue
       // imnprove it from simple setTimeout
