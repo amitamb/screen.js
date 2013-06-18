@@ -224,11 +224,14 @@
         });
       }
       else {
-        screenjs.clickCircle.css({
-          left: "-500px",
-          top: "-500px",
-          display: "none"
-        });
+        if ( screenjs.clickCircle.css("display") != "none" ) {
+          console.log("Hiding clickCircle");
+          screenjs.clickCircle.css({
+            left: "-500px",
+            top: "-500px",
+            display: "none"
+          });
+        }
       }
       // getPlayFrameScreenjs().setMousePosition(eventData.pageX, eventData.pageY);
     }
@@ -560,7 +563,7 @@
 
     var eventType = "start";
     var eventData = {
-      html: getPageHTMLWithCSS(),
+      //html: getPageHTMLWithCSS(),
       base: window.location.href.match(/^(.*\/)[^\/]*$/)[1],
       height: $(window).height(),
       width: $(window).width()
