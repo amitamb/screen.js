@@ -13,6 +13,10 @@
 
   screenjs.debug = true;
 
+  // this is used while recording and
+  // playing as well
+  screenjs.isMouseDown = false;
+
   var getPlayFrameScreenjs = function(){
     return screenjs.playFrame.contentWindow.screenjs;
   };
@@ -146,8 +150,16 @@
     });
     // mouse events
     $("*").on("mousedown.screenjs", function(event){
+      // TODO: Identify and process which key was pressed
       if ( this == event.target ) {
         console.log("mousedown event called");
+
+        // only consider mouseDown when left mouse button 
+        // is pressed
+        if ( event.which == 1 ) {
+          screenjs.isMouseDown = true;
+        }
+
         appendEvent(
           "mousedown",
           {
@@ -174,8 +186,16 @@
         }
       }
     });
+    // TODO: Identify and process which key was pressed
     $("*").on("mouseup.screenjs", function(event){
       if ( this == event.target ) {
+
+        // only consider mouseDown when left mouse button 
+        // is pressed
+        if ( event.which == 1 ) {
+          screenjs.isMouseDown = false;
+        }
+
         console.log("mouseup event called");
         appendEvent(
           "mouseup",
@@ -236,14 +256,13 @@
               display: "none"
             });
           }
-        }, 200)
+        }, 200);
       })(event.data);
       // getPlayFrameScreenjs().setMouseStatus(eventData.pageX, eventData.pageY, false);
     }
   };
 
   var recordKeyboardEvents = function(){
-    // TODO : Later
     $("*").on("keypress.screenjs", function(domEvent){
       if ( this == domEvent.target ) {
         // This is needed only for keypress
@@ -265,18 +284,91 @@
     });
   };
   var playKeyboardEvents = function(event){
-    // TODO : Later
-    console.log(event);
     if ( checkEventType(event, "keypress") ) {
       getPlayFrameScreenjs().changeElementValue(event.data);
     }
   };
 
-  var recordContentSelectionEvents = function(){
+  var recordSelectionEvents = function(){
 
+    // for input and textarea
+    function recordSelection(input_field){
+      var start = input_field.selectionStart;
+      var end = input_field.selectionEnd;
+      if (start != end){
+        appendMicroEvent("inputselect", { jqueryPath : jqueryPath(input_field), start : start, end : end });
+      }
+    }
+
+    var lastInputselectEventData = null;
+    var lastInputselectElement = null;
+
+    // First record input and textarea selection
+    // for it need to track mouse movements
+    $(document).on("mousemove.screenjs", function(domEvent){
+      if ( screenjs.isMouseDown ) {
+        console.log("Selection event");
+        console.log(window.getSelection());
+        var eventData = {
+          nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
+          selectionStart: event.target.selectionStart,
+          selectionEnd: event.target.selectionEnd
+        };
+        if ( lastInputselectEventData != eventData ) {
+          console.log(eventData);
+          console.log(eventData);
+          appendEvent("inputselect", eventData);
+          lastInputselectEventData = eventData;
+        }
+      }
+    });
+
+    // also use general select event
+    $(":input").on("select.screenjs  mouseup.screenjs", function(domEvent){
+      console.log("Selection event 2");
+      console.log(window.getSelection());
+      var eventData = {
+        nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
+        selectionStart: event.target.selectionStart,
+        selectionEnd: event.target.selectionEnd
+      };
+      if ( lastInputselectEventData != eventData ) {
+        appendEvent("inputselect", eventData);
+        lastInputselectEventData = eventData;
+      }
+    });
+
+    // TODO: This should rather be on all the elements as
+    // some nodes can cancel bubbling
+    // to avoid having multiple $("*").on event handlers
+    // hande single one which will call all required functions
+    $(document).on("mousedown.screenjs", function(domEvent){
+
+      // This mouseup is used to capture deselection when user clicks outside or event inside of
+      // the textarea or input
+
+      console.log("Selection event 3");
+      console.log(window.getSelection());
+
+      if ( lastInputselectElement ) {
+        var eventData = {
+        nodeId: screenjs.mirrorClient.serializeNode(lastInputselectElement),
+        selectionStart: lastInputselectElement.selectionStart,
+        selectionEnd: lastInputselectElement.selectionEnd
+        };
+        if ( lastInputselectEventData != eventData ) {
+          appendEvent("inputselect", eventData);
+          lastInputselectEventData = eventData;
+        }
+      }
+    });
   };
-  var playContentSelectionEvents = function(){
-
+  var playSelectionEvents = function(event){
+    if ( checkEventType(event, "inputselect") ) {
+      // TODO: Consider using a generic way of calling such handlers rather than a seperate
+      // function for each event
+      getPlayFrameScreenjs().handleInputselect(event.data);
+    }
   };
 
   var recordFormEvents = function(){
@@ -356,11 +448,16 @@
 
     // handle keyboard events
     recordKeyboardEvents();
+
     // handle text selection events
+    recordSelectionEvents();
+
     // handle form submition event
     recordFormEvents();
+
     // handle navigation event i.e. unloading of page
 
+    // misc events like scroll
     recordMiscEvents();
 
     // TODO: Investigate how to record mouseover event for
@@ -382,6 +479,9 @@
     options.eventCallback = options.eventCallback || function(event){
       console.log(event);
     };
+
+    // TODO: Create seperate function to do intialization
+    screenjs.isMouseDown = false;
 
     var eventType = "start";
     var eventData = {
@@ -415,6 +515,9 @@
     }
     else if ( checkEventType(event, ["keypress"]) ) {
       playKeyboardEvents(event);
+    }
+    else if ( checkEventType(event, ["inputselect"]) ) {
+      playSelectionEvents(event);
     }
     else if ( checkEventType(event, ["change"]) ) {
       playFormEvents(event);
@@ -521,7 +624,7 @@
       loadScriptInPlayFrame("init.js");
       loadScriptInPlayFrame("mutation_summary.js");
       loadScriptInPlayFrame("tree_mirror.js");
-      loadScriptInPlayFrame("play.js?a10");
+      loadScriptInPlayFrame("play.js?a11");
 
       // TODO: Wait for play.js to load and then continue
       // imnprove it from simple setTimeout

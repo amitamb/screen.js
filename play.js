@@ -88,6 +88,16 @@
     }
   }
 
+  screenjs.handleInputselect = function(eventData){
+    var node = screenjs.mirror.deserializeNode(eventData.nodeId);
+    // TODO: This is temporary fix
+    // but handle focus events in seperate
+    // event handler
+    node.focus();
+    node.selectionStart = eventData.selectionStart;
+    node.selectionEnd = eventData.selectionEnd;
+  };
+
   clearPage();
 
   showMouseImages();
