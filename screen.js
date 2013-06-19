@@ -450,7 +450,7 @@
   var recordFormEvents = function(){
     // TODO: Select doesn't open and can not be opened with js
     // need to figure this out
-    $("input,select,textarea").on("change.screenjs paste.screenjs", function(domEvent){
+    $("input,select,textarea").on("change.screenjs", function(domEvent){
       console.log("Change change event");
       if ( this == domEvent.target ) {
         console.log("Recording event called");
@@ -473,6 +473,27 @@
           nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
           value: val
         });
+      }
+    });
+
+    $("input,select,textarea").on("paste.screenjs", function(domEvent){
+      console.log("Paste change event");
+      if ( this == domEvent.target ) {
+        (function(domEvent){
+          setTimeout(function(){
+            var $element = $(domEvent.target);
+            var val = $element.val();
+
+            if ( $(domEvent.target).is("input[type=password]") ) {
+              val = val.replace(/./g, "-");
+            }
+            appendEvent("change",
+            {
+              nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
+              value: val
+            });
+          }, 0);
+        })(domEvent);
       }
     });
   };
