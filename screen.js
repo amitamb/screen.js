@@ -389,9 +389,8 @@
     // of mousedown and mouseup
     $(document).on("mousemove.screenjs mousedown.screenjs mouseup.screenjs", function(domEvent){
       if ( screenjs.isMouseDown || domEvent.type == "mousedown" || domEvent.type == "mouseup" ) {
-        console.log("Content Selection event");
         var selectionObject = window.getSelection()
-        if ( selectionObject.rangeCount > 0 ) {
+        if ( window.getSelection().toString() != "" && selectionObject.rangeCount > 0 ) {
           rangeObject = getRangeObject(selectionObject);
           var eventData = {
             startNodeId: screenjs.mirrorClient.serializeNode(rangeObject.startContainer),
@@ -406,16 +405,15 @@
             lastContentselectEventData = eventData;
           }
         }
-        else {
-          console.log("Clear selection all *******");
-          if ( lastContentselectEventData ) {
+        setTimeout(function(){
+          if ( lastContentselectEventData && ( window.getSelection().toString() == "" || selectionObject.rangeCount <= 0 ) )  {
             var eventData = {
               clear: true
             };
             appendEvent("contentselect", eventData);
             lastContentselectEventData = null;
           }
-        }
+        }, 0);
       }
     });
 
