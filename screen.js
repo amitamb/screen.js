@@ -298,6 +298,10 @@
     // and even we need to
     // Need more effort on this front
 
+    // TODO: Changes in cursor positions
+    // not always get recorded
+    // especially done with keys
+
     // for input and textarea
     function recordSelection(input_field){
       var start = input_field.selectionStart;
@@ -329,6 +333,25 @@
           lastInputselectEventData = eventData;
         }
       }
+    });
+
+    $(":input").on(" keydown.screenjs", function(domEvent){
+      console.log("This is keydown event on :input");
+      (function(domEvent){
+        setTimeout(function(){
+          var eventData = {
+            nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
+            selectionStart: domEvent.target.selectionStart,
+            selectionEnd: domEvent.target.selectionEnd
+          };
+          if ( lastInputselectEventData != eventData ) {
+            console.log(eventData);
+            console.log(eventData);
+            appendEvent("inputselect", eventData);
+            lastInputselectEventData = eventData;
+          }
+        },0);
+      })(domEvent);
     });
 
     // also use general select event
