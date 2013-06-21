@@ -331,6 +331,7 @@
           console.log(eventData);
           appendEvent("inputselect", eventData);
           lastInputselectEventData = eventData;
+          lastInputselectElement = domEvent.target;
         }
       }
     });
@@ -349,6 +350,7 @@
             console.log(eventData);
             appendEvent("inputselect", eventData);
             lastInputselectEventData = eventData;
+            lastInputselectElement = domEvent.target;
           }
         },0);
       })(domEvent);
@@ -359,12 +361,13 @@
       console.log("Selection event 2");
       var eventData = {
         nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
-        selectionStart: event.target.selectionStart,
-        selectionEnd: event.target.selectionEnd
+        selectionStart: domEvent.target.selectionStart,
+        selectionEnd: domEvent.target.selectionEnd
       };
       if ( lastInputselectEventData != eventData ) {
         appendEvent("inputselect", eventData);
         lastInputselectEventData = eventData;
+        lastInputselectElement = domEvent.target;
       }
     });
 
@@ -372,23 +375,33 @@
     // some nodes can cancel bubbling
     // to avoid having multiple $("*").on event handlers
     // hande single one which will call all required functions
-    $(document).on("mousedown.screenjs", function(domEvent){
+    $(document).on("mousedown.screenjs mouseup.screenjs", function(domEvent){
 
       // This mouseup is used to capture deselection when user clicks outside or event inside of
       // the textarea or input
       console.log("Selection event 3");
 
-      if ( lastInputselectElement ) {
-        var eventData = {
-        nodeId: screenjs.mirrorClient.serializeNode(lastInputselectElement),
-        selectionStart: lastInputselectElement.selectionStart,
-        selectionEnd: lastInputselectElement.selectionEnd
-        };
-        if ( lastInputselectEventData != eventData ) {
-          appendEvent("inputselect", eventData);
-          lastInputselectEventData = eventData;
-        }
-      }
+      // (function(domEvent) {
+      //   setTimeout(function(){
+          if ( lastInputselectElement ) {
+            var eventData = {
+              nodeId: screenjs.mirrorClient.serializeNode(lastInputselectElement),
+              selectionStart: lastInputselectElement.selectionStart,
+              selectionEnd: lastInputselectElement.selectionEnd
+            };
+
+            console.log("***** My eventData *****");
+            console.log(eventData);
+            console.log(lastInputselectEventData);
+
+            if ( lastInputselectEventData != eventData ) {
+              appendEvent("inputselect", eventData);
+              lastInputselectEventData = eventData;
+              lastInputselectElement = domEvent.target;
+            }
+          }
+      //   },0);
+      // })(domEvent);
     });
 
     // Now handle content selection
@@ -615,6 +628,11 @@
 
     registerEventHandlers();
 
+    // TODO: Find better place for this
+    // it is used to handle existing values in input controls
+    // or find a better way to handle such values
+    $(":input").change();
+
     screenjs.recording = true;
   };
 
@@ -744,7 +762,7 @@
       loadScriptInPlayFrame("init.js");
       loadScriptInPlayFrame("mutation_summary.js");
       loadScriptInPlayFrame("tree_mirror.js");
-      loadScriptInPlayFrame("play.js?a16");
+      loadScriptInPlayFrame("play.js?a18");
 
       // TODO: Wait for play.js to load and then continue
       // imnprove it from simple setTimeout

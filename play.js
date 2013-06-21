@@ -93,9 +93,16 @@
     // TODO: This is temporary fix
     // but handle focus events in seperate
     // event handler
-    node.focus();
-    node.selectionStart = eventData.selectionStart;
-    node.selectionEnd = eventData.selectionEnd;
+    if ( eventData.selectionStart == null || eventData.selectionEnd == null ) {
+      node.blur();
+      node.selectionStart = 0;
+      node.selectionEnd = 0;
+    }
+    else {
+      node.focus();
+      node.selectionStart = eventData.selectionStart;
+      node.selectionEnd = eventData.selectionEnd;
+    }
   };
 
   screenjs.handleContentselect = function(eventData) {
