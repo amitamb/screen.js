@@ -88,6 +88,19 @@
     }
   }
 
+  // This is important function to show mouse position at
+  // same position across different devices
+  // this will be called by mousemove across different devices
+  screenjs.getNodeOffsetOffset = function(eventData){
+    var node = screenjs.mirror.deserializeNode(eventData.nodeId);
+    // TODO: Try avoiding using $ and make it fast
+    var nodeOffset = $(node).offset();
+    var nodeOffsetOffset = {};
+    nodeOffsetOffset.left = eventData.nodeOffset.left - nodeOffset.left;
+    nodeOffsetOffset.top = eventData.nodeOffset.top - nodeOffset.top;
+    return nodeOffsetOffset;
+  };
+
   screenjs.handleInputselect = function(eventData){
     var node = screenjs.mirror.deserializeNode(eventData.nodeId);
     // TODO: This is temporary fix

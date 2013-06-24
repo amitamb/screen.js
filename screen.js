@@ -139,12 +139,17 @@
 
     var $window = $(window);
 
-    $(document).on("mousemove.screenjs", function(event){
+    $(document).on("mousemove.screenjs", function(domEvent){
+
       appendEvent(
         "mousemove",
         {
-          pageX: event.pageX - $window.scrollLeft(),
-          pageY: event.pageY - $window.scrollTop()
+          nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
+          // TODO: Try avoiding using $ and make it fast
+          nodeOffset: $(domEvent.target).offset(),
+          // TODO: Try chaning pageX to clientX
+          pageX: domEvent.clientX,
+          pageY: domEvent.clientY
         }
       );
     });
@@ -163,6 +168,8 @@
         appendEvent(
           "mousedown",
           {
+            // TODO: Following is not used while playing
+            // consider removing it
             pageX: event.pageX - $window.scrollLeft(),
             pageY: event.pageY - $window.scrollTop()
           }
@@ -212,14 +219,21 @@
       // TODO: change position of mouse image on page
       var eventData = event.data;
       // TODO: Make sure it works in IE
+
+
+      var nodeOffsetOffset = getPlayFrameScreenjs().getNodeOffsetOffset(eventData);
+
+      var cursorLeft = eventData.pageX - nodeOffsetOffset.left;
+      var cursorTop = eventData.pageY - nodeOffsetOffset.top;
+
       screenjs.mouseCursor.css({
-        left: eventData.pageX,
-        top: eventData.pageY
+        left: cursorLeft,
+        top: cursorTop
       });
       if (screenjs.isMouseDown){
         screenjs.clickCircle.css({
-          left: eventData.pageX - 16,
-          top: eventData.pageY - 16,
+          left: cursorLeft - 16,
+          top: cursorTop - 16,
           display: "block"
         });
       }
@@ -239,9 +253,16 @@
       console.log("mousedown found");
       screenjs.isMouseDown = true;
       var eventData = event.data;
+      // Using position instead of offset
+      // as mouseCursoe is shown in a div
+      // overlayed on iframe
+      // using offset would add offset of the parent div
+      var mouseCursorPosition = screenjs.mouseCursor.position();
+      var mouseCursorLeft = mouseCursorPosition.left;
+      var mouseCursorTop = mouseCursorPosition.top;
       screenjs.clickCircle.css({
-        left: eventData.pageX - 16,
-        top: eventData.pageY - 16,
+        left: mouseCursorLeft - 16,
+        top: mouseCursorTop - 16,
         display: "block"
       });
       // getPlayFrameScreenjs().setMouseStatus(eventData.pageX, eventData.pageY, true);
@@ -487,7 +508,6 @@
     // TODO: Select doesn't open and can not be opened with js
     // need to figure this out
     $("input,select,textarea").on("change.screenjs", function(domEvent){
-      console.log("Change change event");
       if ( this == domEvent.target ) {
         console.log("Recording event called");
         var $element = $(domEvent.target);
@@ -513,7 +533,6 @@
     });
 
     $("input,select,textarea").on("paste.screenjs", function(domEvent){
-      console.log("Paste change event");
       if ( this == domEvent.target ) {
         (function(domEvent){
           setTimeout(function(){
@@ -550,7 +569,6 @@
     // track scrolling
     // TODO: Track scrolling event inside a div
     var scrollHandler = function(domEvent){
-      console.log(screenjs.mirrorClient.serializeNode(domEvent.target));
       if ( this == domEvent.target ) {
 
         appendEvent("scroll",
@@ -762,7 +780,7 @@
       loadScriptInPlayFrame("init.js");
       loadScriptInPlayFrame("mutation_summary.js");
       loadScriptInPlayFrame("tree_mirror.js");
-      loadScriptInPlayFrame("play.js?a18");
+      loadScriptInPlayFrame("play.js?a19");
 
       // TODO: Wait for play.js to load and then continue
       // imnprove it from simple setTimeout
