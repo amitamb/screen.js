@@ -565,6 +565,82 @@
     
   };
 
+  var recordHoverEvents = function(){
+    // TODDO: Handle canceled bubbling of events
+    // and consider using this element on all elements
+
+    // var goingToElement = null;
+    // var goingToElementData = null;
+    // var goingToElementComputedStyle = null;
+
+    function shouldProcessHoverEvents(node){
+      return ["li", "a", "button", "input", "img"].indexOf(node.nodeName.toLowerCase()) >= 0;
+    };
+
+    console.log("Registred mouseout");
+    $(document).on("mouseout", function(domEvent){
+      // if ( this == domEvent.target ) {
+      //   console.log("Mouseout called");
+        // goingToElement = domEvent.relatedTarget;
+        // var rawGoingToElementComputedStyle = window.getComputedStyle(goingToElement);
+        // goingToElementComputedStyle = {
+        //   "text-decoration": rawGoingToElementComputedStyle.textDecoration//,
+        //   //"text-decoration": rawGoingToElementComputedStyle.getPropertyValue("text-decoration")
+        // };
+        // console.log("***************************");
+        // console.log(goingToElementComputedStyle);
+        // console.log("***************************");
+      // }
+
+      if ( shouldProcessHoverEvents(domEvent.target) ) {
+        appendEvent("mouseout", {
+          nodeId: screenjs.mirrorClient.serializeNode(domEvent.target)
+        });
+      }
+
+    });
+
+    $(document).on("mouseover", function(domEvent){
+
+      // TODO: There are many complex scanarios which following 
+      // code misses. Think of better ways to handle them
+
+      // TODO: Also when using proxy have all external stylesheets proxied through
+      // local DNS address
+
+      // background
+      // text-decoration
+      // border
+      if ( shouldProcessHoverEvents(domEvent.target) ) {
+        var rawNodeComputedStyle = window.getComputedStyle(domEvent.target);
+        var nodeComputedStyle = {
+          color: rawNodeComputedStyle.color,
+          background: rawNodeComputedStyle.background,
+          textDecoration: rawNodeComputedStyle.textDecoration,
+          border: rawNodeComputedStyle.border
+        };
+
+        // console.log("mouseover called");
+
+        appendEvent("mouseover", {
+          nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
+          nodeStyle: nodeComputedStyle
+        });
+      }
+    });
+  };
+
+  var playHoverEvents = function(event){
+    if ( checkEventType(event, "mouseover") ) {
+      // console.log(event);
+      getPlayFrameScreenjs().setTransientStyles(event.data);
+    }
+    else if ( checkEventType(event, "mouseout") ) {
+      // console.log(event);
+      getPlayFrameScreenjs().resetTransientStyles(event.data);
+    }
+  };
+
   var recordMiscEvents = function(){
     // track scrolling
     // TODO: Track scrolling event inside a div
@@ -608,14 +684,15 @@
 
     // handle navigation event i.e. unloading of page
 
-    // misc events like scroll
-    recordMiscEvents();
-
     // TODO: Investigate how to record mouseover event for
     // elements which use :hover, :active pseudo-elements
     // may be querying for styles on mouseenter and 
     // checking for changes in computed style
     // would be the solution
+    recordHoverEvents();
+
+    // misc events like scroll
+    recordMiscEvents();
 
     // TODO: handle video playback events for youtube and vimeo
   };
@@ -677,6 +754,9 @@
     }
     else if ( checkEventType(event, ["change"]) ) {
       playFormEvents(event);
+    }
+    else if ( checkEventType(event, ["mouseover", "mouseout"]) ) {
+      playHoverEvents(event);
     }
     else {
       playMiscEvents(event);
@@ -780,7 +860,7 @@
       loadScriptInPlayFrame("init.js");
       loadScriptInPlayFrame("mutation_summary.js");
       loadScriptInPlayFrame("tree_mirror.js");
-      loadScriptInPlayFrame("play.js?a19");
+      loadScriptInPlayFrame("play.js?a21");
 
       // TODO: Wait for play.js to load and then continue
       // imnprove it from simple setTimeout

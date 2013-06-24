@@ -138,6 +138,23 @@
     }
   };
 
+  screenjs.setTransientStyles = function(eventData){
+    var node = screenjs.mirror.deserializeNode(eventData.nodeId);
+    var style = eventData.nodeStyle;
+    node.style.color = style.color;
+    node.style.background = style.background;
+    node.style.textDecoration = style.textDecoration;
+    node.style.border = style.border;
+  };
+
+  screenjs.resetTransientStyles = function(eventData){
+    var node = screenjs.mirror.deserializeNode(eventData.nodeId);
+    node.style.color = null;
+    node.style.background = null;
+    node.style.textDecoration = null;
+    node.style.border = null;
+  };
+
   clearPage();
 
   showMouseImages();
