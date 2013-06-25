@@ -574,23 +574,28 @@
     // var goingToElementComputedStyle = null;
 
     function shouldProcessHoverEvents(node){
-      return ["li", "a", "button", "input", "img"].indexOf(node.nodeName.toLowerCase()) >= 0;
+      var retVal = ["li", "a", "button", "input", "img"].indexOf(node.nodeName.toLowerCase()) >= 0;
+      if ( !retVal ) {
+        if ( node.childElementCount == 0 ) {
+          retVal = true;
+        }
+      }
+      return retVal;
+    };
+
+    function getHoverComputedStyles(node){
+      var rawNodeComputedStyle = window.getComputedStyle(node);
+      var nodeComputedStyle = {
+        color: rawNodeComputedStyle.color,
+        background: rawNodeComputedStyle.background,
+        textDecoration: rawNodeComputedStyle.textDecoration,
+        border: rawNodeComputedStyle.border
+      };
+      return nodeComputedStyle;
     };
 
     console.log("Registred mouseout");
     $(document).on("mouseout", function(domEvent){
-      // if ( this == domEvent.target ) {
-      //   console.log("Mouseout called");
-        // goingToElement = domEvent.relatedTarget;
-        // var rawGoingToElementComputedStyle = window.getComputedStyle(goingToElement);
-        // goingToElementComputedStyle = {
-        //   "text-decoration": rawGoingToElementComputedStyle.textDecoration//,
-        //   //"text-decoration": rawGoingToElementComputedStyle.getPropertyValue("text-decoration")
-        // };
-        // console.log("***************************");
-        // console.log(goingToElementComputedStyle);
-        // console.log("***************************");
-      // }
 
       if ( shouldProcessHoverEvents(domEvent.target) ) {
         appendEvent("mouseout", {
@@ -612,20 +617,39 @@
       // text-decoration
       // border
       if ( shouldProcessHoverEvents(domEvent.target) ) {
-        var rawNodeComputedStyle = window.getComputedStyle(domEvent.target);
-        var nodeComputedStyle = {
-          color: rawNodeComputedStyle.color,
-          background: rawNodeComputedStyle.background,
-          textDecoration: rawNodeComputedStyle.textDecoration,
-          border: rawNodeComputedStyle.border
+
+        // TODO: Implement better way of handling parent to
+        // child hovering of events
+        var eventData = {
+          nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
+          nodeStyle: getHoverComputedStyles(domEvent.target)
         };
 
-        // console.log("mouseover called");
+        // Task of following code is to decide whether parent got called for hover event
+        // before current target got called for mouseover
+        // this happens when child is occupying whole visible area of parent
+        // and child gets directly called with mouseover without parent ever getting its
+        // styles getting captured
 
-        appendEvent("mouseover", {
-          nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
-          nodeStyle: nodeComputedStyle
-        });
+        // TODO: Commenting out following non-fullproof
+        // way of handling parent:hover from child
+
+        // // check if relatedTarget is parent
+        // // then nothing to do
+        // // otherwise check for other things
+        // // i.e. check if mouse is coming from parent
+        // if ( domEvent.relatedTarget != domEvent.target.parentNode ) {
+        //   // check if mouse is coming from a sibling
+        //   if ( domEvent.relatedTarget.parentNode != domEvent.target.parentNode ) {
+        //     // check if mouse is coming from child
+        //     if ( domEvent.relatedTarget.parentNode != domEvent.target ) { 
+        //       // now we should store the style of parent as well
+        //       eventData.parentNodeStyle = getHoverComputedStyles(domEvent.target.parentNode);
+        //     }
+        //   }
+        // }
+
+        appendEvent("mouseover", eventData);
       }
     });
   };

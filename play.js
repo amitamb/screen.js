@@ -139,12 +139,26 @@
   };
 
   screenjs.setTransientStyles = function(eventData){
+
+    // TODO: Refactor the styles list setting and resetting
+
     var node = screenjs.mirror.deserializeNode(eventData.nodeId);
     var style = eventData.nodeStyle;
     node.style.color = style.color;
     node.style.background = style.background;
     node.style.textDecoration = style.textDecoration;
     node.style.border = style.border;
+
+    // TODO: Uncomment when uncommenting relevant portion in screen.js
+    // if ( eventData.parentNodeStyle ) {
+    //   var parentStyle = eventData.parentNodeStyle;
+    //   node.parentNode.style.color = parentStyle.color;
+    //   node.parentNode.style.background = parentStyle.background;
+    //   node.parentNode.style.textDecoration = parentStyle.textDecoration;
+    //   node.parentNode.style.border = parentStyle.border;
+
+    //   node.parentNode.attributes["hasHoverStyles"] = true;
+    // }
   };
 
   screenjs.resetTransientStyles = function(eventData){
@@ -153,6 +167,13 @@
     node.style.background = null;
     node.style.textDecoration = null;
     node.style.border = null;
+    // TODO: Uncomment when uncommenting relevant portion in screen.js
+    // if ( node.parentNode && node.parentNode.attributes["hasHoverStyles"] == true ) {
+    //   node.parentNode.style.color = null;
+    //   node.parentNode.style.background = null;
+    //   node.parentNode.style.textDecoration = null;
+    //   node.parentNode.style.border = null;
+    // }
   };
 
   clearPage();
