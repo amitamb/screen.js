@@ -711,9 +711,11 @@
     $(document).on("mouseout", function(domEvent){
 
       if ( shouldProcessHoverEvents(domEvent.target) ) {
-        appendEvent("mouseout", {
-          nodeId: screenjs.mirrorClient.serializeNode(domEvent.target)
-        });
+        var eventData = {
+          nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
+          nodeStyle: getHoverComputedStyles(domEvent.target)
+        };
+        appendEvent("mouseout", eventData);
       }
 
     });
@@ -781,7 +783,7 @@
     else if ( checkEventType(event, "mouseout") ) {
       // console.log(event);
       changeMouseCursor("default");
-      getPlayFrameScreenjs().resetTransientStyles(event.data);
+      getPlayFrameScreenjs().setTransientStyles(event.data);
     }
   };
 

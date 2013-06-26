@@ -142,6 +142,7 @@
 
     // TODO: Refactor the styles list setting and resetting
 
+    // FIXME : Following code resets any style attributes as well
     var node = screenjs.mirror.deserializeNode(eventData.nodeId);
     var style = eventData.nodeStyle;
     node.style.color = style.color;
