@@ -42,7 +42,7 @@
       if (tagName == 'HEAD') {
         var node = document.createElement('HEAD');
         node.appendChild(document.createElement('BASE'));
-        node.firstChild.href = screenjs.base;
+        node.firstChild.href = "http://news.ycombinator.com/"; //screenjs.base;
         return node;
       }
     }
@@ -159,6 +159,10 @@
 
     //   node.parentNode.attributes["hasHoverStyles"] = true;
     // }
+
+    // TODO: This is non-intuitive that
+    // this function returns a node. Think of a better approach
+    return node;
   };
 
   screenjs.resetTransientStyles = function(eventData){

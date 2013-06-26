@@ -44,9 +44,117 @@
     return htmlElem.html();
   };
 
+  var cursorOffsets = {};
+
+  cursorOffsets.mac = {
+    default: {
+      offsetX: 0,
+      offsetY: 0
+    },
+    pointer: {
+      offsetX: -9,
+      offsetY: -2
+    },
+    text: {
+      offsetX: -4,
+      offsetY: -8
+    }
+  };
+
+  var cursorToNodeMap = {};
+
+  function getCursorName(cursorName, node){
+    var cursorName;
+    if ( node && cursorName == "auto" ) {
+      var nodeName = node.nodeName.toLowerCase();
+      if ( nodeName == "input" || nodeName == "textarea" ) {
+        // TODO: Identify when mouse is over text
+        // node simply does not convey status of pointer
+        cursorName = "text";
+      }
+      else if ( nodeName == "a" ) {
+        cursorName = "pointer";
+      }
+      else {
+        cursorName = "default";
+      }
+    }
+    else {
+      if ( ["default","pointer","text"].indexOf(cursorName) < 0 ) { 
+        // return getMouseCursor("default"); 
+        cursorName = "default";
+      }
+    }
+    return cursorName;
+  };
+
+  function getMouseCursor(cursorName, node){
+    var cursorNode = cursorToNodeMap[cursorName];
+    if ( cursorNode ) {
+      cursorNode.css({
+
+      });
+      return cursorNode;
+    }
+    if ( ["default","pointer","text"].indexOf(cursorName) < 0 ) { return getMouseCursor("default"); }
+
+    // copy current cursor's left top while creating new cursor
+    // if ( screenjs.mouseCursor ) {
+    //   var position = screenjs.mouseCursor.position();
+    //   left = position.left;
+    //   top = position.top;
+    // }
+    // else {
+      left = -500;
+      top = -500;
+    // }
+
+    cursorToNodeMap[cursorName] = $("<img></img>");
+    return cursorToNodeMap[cursorName].attr("src", "cursors/mac/"+cursorName+".png").css({
+      position:"absolute",
+      display:"block",
+      left:left+"px",
+      top:top+"px",
+      "margin-left":cursorOffsets["mac"][cursorName].offsetX,
+      "margin-top":cursorOffsets["mac"][cursorName].offsetY,
+      "z-index":"10000"
+    }).attr("data-cursor-name", cursorName).appendTo(screenjs.frameOverlay);
+  }
+
+  function changeMouseCursor(cursorName, node){
+    if ( node ) {
+      cursorName = getCursorName(cursorName, node);
+    }
+    if ( screenjs.mouseCursor && screenjs.mouseCursor.data("cursor-name") == cursorName ) {
+      return;
+    }
+    var originalMouseCursor = screenjs.mouseCursor;
+    screenjs.mouseCursor = getMouseCursor(cursorName, node);
+    // copy current cursor's left top while creating new cursor
+    if ( screenjs.mouseCursor == originalMouseCursor ) { return; }
+    var left, top;
+    if ( originalMouseCursor ) {
+      var position = originalMouseCursor.position();
+      left = position.left;
+      top = position.top;
+    }
+    else {
+      left = -500;
+      top = -500;
+    }
+    originalMouseCursor.css({
+      display: "none"
+    });
+    screenjs.mouseCursor.css({
+      display: "block",
+      left:left+"px",
+      top:top+"px"
+    });
+  };
+
   function showMouseImages(){
     screenjs.clickCircle = $("<img></img>");
-    screenjs.clickCircle.attr("src", "circle.png").css({
+    screenjs.clickCircle.attr("src", "cursors/extra/circle.png").css({
       position:"absolute",
       display:"block",
       left:"-500px",
@@ -59,14 +167,18 @@
 
     // TODO: Show different cursor as user moves over links
     // and input boxes
+
+    var os = "mac";
+
     screenjs.mouseCursor = $("<img></img>");
-    screenjs.mouseCursor.attr("src", "mouse4.png").css({
-      position:"absolute",
-      display:"block",
-      left:"-500px",
-      top:"-500px",
-      "z-index":"10000"
-    }).appendTo(screenjs.frameOverlay);
+    screenjs.mouseCursor = getMouseCursor("default");
+    // .attr("src", defaultCursor).css({
+    //   position:"absolute",
+    //   display:"block",
+    //   left:"-500px",
+    //   top:"-500px",
+    //   "z-index":"10000"
+    // }).appendTo(screenjs.frameOverlay);
   }
 
   function createEvent(eventType, eventData){
@@ -586,6 +698,7 @@
     function getHoverComputedStyles(node){
       var rawNodeComputedStyle = window.getComputedStyle(node);
       var nodeComputedStyle = {
+        cursor: rawNodeComputedStyle.cursor, 
         color: rawNodeComputedStyle.color,
         background: rawNodeComputedStyle.background,
         textDecoration: rawNodeComputedStyle.textDecoration,
@@ -657,10 +770,17 @@
   var playHoverEvents = function(event){
     if ( checkEventType(event, "mouseover") ) {
       // console.log(event);
-      getPlayFrameScreenjs().setTransientStyles(event.data);
+      console.log(event.data.nodeStyle.cursor);
+      var node = getPlayFrameScreenjs().setTransientStyles(event.data);
+
+      // TODO: This is non-intuitive that
+      // this function returns a node. Think of a better approach
+      // changeMouseCursor();
+      changeMouseCursor(event.data.nodeStyle.cursor, node);
     }
     else if ( checkEventType(event, "mouseout") ) {
       // console.log(event);
+      changeMouseCursor("default");
       getPlayFrameScreenjs().resetTransientStyles(event.data);
     }
   };
@@ -884,7 +1004,7 @@
       loadScriptInPlayFrame("init.js");
       loadScriptInPlayFrame("mutation_summary.js");
       loadScriptInPlayFrame("tree_mirror.js");
-      loadScriptInPlayFrame("play.js?a21");
+      loadScriptInPlayFrame("play.js?a22");
 
       // TODO: Wait for play.js to load and then continue
       // imnprove it from simple setTimeout
