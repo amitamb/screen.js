@@ -75,7 +75,12 @@
       else if ( nodeName == "a" ) {
         cursorName = "pointer";
       }
+      // detecting only textual nodes
+      else if ( node.childElementCount == 0 && node.childNodes.length == 1 && node.childNodes[0].nodeType == 3 ) {
+        cursorName = "text";
+      }
       else {
+        console.log(node.nodeName);
         cursorName = "default";
       }
     }
@@ -332,7 +337,7 @@
       var eventData = event.data;
       // TODO: Make sure it works in IE
 
-
+      // TODO: Consider using scaling instead of offsets
       var nodeOffsetOffset = getPlayFrameScreenjs().getNodeOffsetOffset(eventData);
 
       var cursorLeft = eventData.pageX - nodeOffsetOffset.left;
@@ -681,6 +686,9 @@
     // TODDO: Handle canceled bubbling of events
     // and consider using this element on all elements
 
+    // TODO: Handle hovering correctly when user drags mouse across the document
+    // basic idea would be to just have 
+
     // var goingToElement = null;
     // var goingToElementData = null;
     // var goingToElementComputedStyle = null;
@@ -688,7 +696,7 @@
     function shouldProcessHoverEvents(node){
       var retVal = ["li", "a", "button", "input", "img"].indexOf(node.nodeName.toLowerCase()) >= 0;
       if ( !retVal ) {
-        if ( node.childElementCount == 0 ) {
+        if ( node.childElementCount <= 0 ) {
           retVal = true;
         }
       }
@@ -707,8 +715,7 @@
       return nodeComputedStyle;
     };
 
-    console.log("Registred mouseout");
-    $(document).on("mouseout", function(domEvent){
+    $(document).on("mouseout.screenjs", function(domEvent){
 
       if ( shouldProcessHoverEvents(domEvent.target) ) {
         var eventData = {
@@ -720,7 +727,7 @@
 
     });
 
-    $(document).on("mouseover", function(domEvent){
+    $(document).on("mouseover.screenjs", function(domEvent){
 
       // TODO: There are many complex scanarios which following 
       // code misses. Think of better ways to handle them
@@ -772,7 +779,6 @@
   var playHoverEvents = function(event){
     if ( checkEventType(event, "mouseover") ) {
       // console.log(event);
-      console.log(event.data.nodeStyle.cursor);
       var node = getPlayFrameScreenjs().setTransientStyles(event.data);
 
       // TODO: This is non-intuitive that
