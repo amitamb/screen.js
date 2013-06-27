@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- This will be used by test page -->
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script>
+      $(function(){
+        $("#b1").click(function(){
+          window.location = "http://www.amitamb.com/?aaa";
+          alert(window.location);
+        });
+      });
+    </script>
+  </head>
+  <body>
+    Location changes check<br />
+    <button id="b1">Change location</button>
+  </body>
+</html>
