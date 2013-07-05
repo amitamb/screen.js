@@ -687,11 +687,14 @@
     // and consider using this element on all elements
 
     // TODO: Handle hovering correctly when user drags mouse across the document
-    // basic idea would be to just have 
+    // basic idea would be to just have text pointer when user drags
 
     // var goingToElement = null;
     // var goingToElementData = null;
     // var goingToElementComputedStyle = null;
+
+    // TODO: Use actual browser value
+    var isBrowserFirefox = true;
 
     function shouldProcessHoverEvents(node){
       var retVal = ["li", "a", "button", "input", "img"].indexOf(node.nodeName.toLowerCase()) >= 0;
@@ -712,17 +715,49 @@
         textDecoration: rawNodeComputedStyle.textDecoration,
         border: rawNodeComputedStyle.border
       };
+
+      // TODO: Improve following approach
+      // Firefox Only: 
+      // following settings are needed to be storedfor for firefox
+      // as it doesn't aggregate border components into single
+      // border attribute like chrome does
+      if ( isBrowserFirefox ) {
+        nodeComputedStyle.borderTopWidth = rawNodeComputedStyle.borderTopWidth;
+        nodeComputedStyle.borderRightWidth = rawNodeComputedStyle.borderRightWidth;
+        nodeComputedStyle.borderBottomWidth = rawNodeComputedStyle.borderBottomWidth;
+        nodeComputedStyle.borderLeftWidth = rawNodeComputedStyle.borderLeftWidth;
+        nodeComputedStyle.borderTopColor = rawNodeComputedStyle.borderTopColor;
+        nodeComputedStyle.borderRightColor = rawNodeComputedStyle.borderRightColor;
+        nodeComputedStyle.borderBottomColor = rawNodeComputedStyle.borderBottomColor;
+        nodeComputedStyle.borderLeftColor = rawNodeComputedStyle.borderLeftColor;
+        nodeComputedStyle.borderTopStyle = rawNodeComputedStyle.borderTopStyle;
+        nodeComputedStyle.borderRightStyle = rawNodeComputedStyle.borderRightStyle;
+        nodeComputedStyle.borderBottomStyle = rawNodeComputedStyle.borderBottomStyle;
+        nodeComputedStyle.borderLeftStyle = rawNodeComputedStyle.borderLeftStyle;
+
+        nodeComputedStyle.backgroundColor = rawNodeComputedStyle.backgroundColor;
+      }
+
       return nodeComputedStyle;
     };
 
     $(document).on("mouseout.screenjs", function(domEvent){
 
       if ( shouldProcessHoverEvents(domEvent.target) ) {
-        var eventData = {
-          nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
-          nodeStyle: getHoverComputedStyles(domEvent.target)
-        };
-        appendEvent("mouseout", eventData);
+        // Firefox Only: 
+        // Following timeout is needed only on firefox as style information
+        // for :hover pseudo class doesn't get updated until 
+        (function(domEvent){
+          setTimeout(function(){
+            var eventData = {
+              nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
+              nodeStyle: getHoverComputedStyles(domEvent.target)
+            };
+            console.log(domEvent.target);
+            console.log(getHoverComputedStyles(domEvent.target));
+            appendEvent("mouseout", eventData);
+          }, 0);
+        })(domEvent);
       }
 
     });
@@ -740,38 +775,47 @@
       // border
       if ( shouldProcessHoverEvents(domEvent.target) ) {
 
-        // TODO: Implement better way of handling parent to
-        // child hovering of events
-        var eventData = {
-          nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
-          nodeStyle: getHoverComputedStyles(domEvent.target)
-        };
+        // TODO: In Firefox, figure out why following timeouts are
+        // not working to fix the issue of not having pointer icon
+        // set correctly when mouse overs some items
 
-        // Task of following code is to decide whether parent got called for hover event
-        // before current target got called for mouseover
-        // this happens when child is occupying whole visible area of parent
-        // and child gets directly called with mouseover without parent ever getting its
-        // styles getting captured
+        // (function(domEvent){
+        //   setTimeout(function(domEvent){
 
-        // TODO: Commenting out following non-fullproof
-        // way of handling parent:hover from child
+            // TODO: Implement better way of handling parent to
+            // child hovering of events
+            var eventData = {
+              nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
+              nodeStyle: getHoverComputedStyles(domEvent.target)
+            };
 
-        // // check if relatedTarget is parent
-        // // then nothing to do
-        // // otherwise check for other things
-        // // i.e. check if mouse is coming from parent
-        // if ( domEvent.relatedTarget != domEvent.target.parentNode ) {
-        //   // check if mouse is coming from a sibling
-        //   if ( domEvent.relatedTarget.parentNode != domEvent.target.parentNode ) {
-        //     // check if mouse is coming from child
-        //     if ( domEvent.relatedTarget.parentNode != domEvent.target ) { 
-        //       // now we should store the style of parent as well
-        //       eventData.parentNodeStyle = getHoverComputedStyles(domEvent.target.parentNode);
-        //     }
-        //   }
-        // }
+            // Task of following code is to decide whether parent got called for hover event
+            // before current target got called for mouseover
+            // this happens when child is occupying whole visible area of parent
+            // and child gets directly called with mouseover without parent ever getting its
+            // styles getting captured
 
-        appendEvent("mouseover", eventData);
+            // TODO: Commenting out following non-fullproof
+            // way of handling parent:hover from child
+
+            // // check if relatedTarget is parent
+            // // then nothing to do
+            // // otherwise check for other things
+            // // i.e. check if mouse is coming from parent
+            // if ( domEvent.relatedTarget != domEvent.target.parentNode ) {
+            //   // check if mouse is coming from a sibling
+            //   if ( domEvent.relatedTarget.parentNode != domEvent.target.parentNode ) {
+            //     // check if mouse is coming from child
+            //     if ( domEvent.relatedTarget.parentNode != domEvent.target ) { 
+            //       // now we should store the style of parent as well
+            //       eventData.parentNodeStyle = getHoverComputedStyles(domEvent.target.parentNode);
+            //     }
+            //   }
+            // }
+
+            appendEvent("mouseover", eventData);
+        //   }, 0);
+        // })(domEvent);
       }
     });
   };

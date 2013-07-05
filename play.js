@@ -138,6 +138,8 @@
     }
   };
 
+  var isBrowserFirefox = true;
+
   screenjs.setTransientStyles = function(eventData){
 
     // TODO: Refactor the styles list setting and resetting
@@ -149,6 +151,26 @@
     node.style.background = style.background;
     node.style.textDecoration = style.textDecoration;
     node.style.border = style.border;
+
+    // TODO: Check if need to check this flag
+    // as recording might have happened on firefox then only need to consider those files
+    // i.e. only copy the styles when recording happened firefox
+    if ( isBrowserFirefox ) {
+      node.style.borderTopWidth = style.borderTopWidth;
+      node.style.borderRightWidth = style.borderRightWidth;
+      node.style.borderBottomWidth = style.borderBottomWidth;
+      node.style.borderLeftWidth = style.borderLeftWidth;
+      node.style.borderTopColor = style.borderTopColor;
+      node.style.borderRightColor = style.borderRightColor;
+      node.style.borderBottomColor = style.borderBottomColor;
+      node.style.borderLeftColor = style.borderLeftColor;
+      node.style.borderTopStyle = style.borderTopStyle;
+      node.style.borderRightStyle = style.borderRightStyle;
+      node.style.borderBottomStyle = style.borderBottomStyle;
+      node.style.borderLeftStyle = style.borderLeftStyle;
+
+      node.style.backgroundColor = style.backgroundColor;
+    }
 
     // TODO: Uncomment when uncommenting relevant portion in screen.js
     // if ( eventData.parentNodeStyle ) {
@@ -166,6 +188,8 @@
     return node;
   };
 
+
+  // TODO: Consider removing this style
   screenjs.resetTransientStyles = function(eventData){
     var node = screenjs.mirror.deserializeNode(eventData.nodeId);
     node.style.color = null;
