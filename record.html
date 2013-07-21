@@ -6,11 +6,31 @@
       $(function(){
         var frame = $("#recordFrame")[0];
         $("#record").on("click", function(){
-          frame.contentWindow.screenjs.record()
+          frame.contentWindow.postMessage({
+            type: "screenjsMessage",
+            command: "record"
+          },"*");
+          // frame.contentWindow.screenjs.record()
         });
         $("#stopRecording").on("click", function(){
-          localStorage.events = JSON.stringify(frame.contentWindow.screenjs.stopRecording());
+          // localStorage.events = JSON.stringify(frame.contentWindow.screenjs.stopRecording());
+          frame.contentWindow.postMessage({
+            type: "screenjsMessage",
+            command: "stopRecording"
+          },"*");
         });
+
+        window.addEventListener("message", receiveMessage, false);
+
+        function receiveMessage(event)
+        {
+          if ( event.data && event.data.type && event.data.type == "screenjsMessage" ) {
+            if ( event.data.event && event.data.event == "doneRecording" ) {
+              localStorage.events = JSON.stringify(event.data.data);
+            }
+          }
+        }
+
       });
     </script>
   </head>
@@ -18,6 +38,6 @@
     <button id="record">Record</button>
     <button id="stopRecording">Stop</button>
     <br />
-    <iframe id="recordFrame" src="test.html" style="width:1000px;height:520px;border:1px solid #222;"></iframe>
+    <iframe id="recordFrame" src="http://www.craigslist.org.dev-proxy.castbin.com/" style="width:1056px;height:600px;border:1px solid #222;"></iframe>
   </body>
 </html>

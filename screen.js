@@ -1080,6 +1080,33 @@
     clearInterval(screenjs.timeoutId);
   };
 
+  // Add cross domain message handlers
+  window.addEventListener("message", receiveMessage, false);
+
+  function receiveMessage(event)
+  {
+    // if (event.origin !== "http://example.org:8080")
+    //   return;
+    // alert("Message received");
+
+    if ( event.data && event.data.type && event.data.type == "screenjsMessage" ) {
+      if ( event.data.command && event.data.command == "record" ) {
+        screenjs.record();
+      }
+      else if ( event.data.command && event.data.command == "stopRecording" ) {
+        var data = screenjs.stopRecording();
+
+        event.source.postMessage({
+          type: "screenjsMessage",
+          event: "doneRecording",
+          data: data
+        },"*");
+
+      }
+    }
+
+  }
+
   window.screenjs = screenjs;
 
 })(window.screenjs$);
