@@ -39,12 +39,12 @@
         return node;
       }
 
-      if (tagName == 'HEAD') {
-        var node = document.createElement('HEAD');
-        node.appendChild(document.createElement('BASE'));
-        node.firstChild.href = "http://news.ycombinator.com/"; //screenjs.base;
-        return node;
-      }
+      // if (tagName == 'HEAD') {
+      //   var node = document.createElement('HEAD');
+      //   node.appendChild(document.createElement('BASE'));
+      //   node.firstChild.href = "http://news.ycombinator.com/"; //screenjs.base;
+      //   return node;
+      // }
     }
   });
 

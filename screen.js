@@ -80,8 +80,21 @@
         cursorName = "text";
       }
       else {
-        console.log(node.nodeName);
-        cursorName = "default";
+        var level = 1;
+        var parentNode = node.parentNode;
+        while ( parentNode && level <= 3 ) { // only 3 levels
+          if ( parentNode.nodeName.toLowerCase() == "a" ) {
+            cursorName = "pointer";
+            console.log("Parent a found")
+            break;
+          }
+          else {
+            parentNode = parentNode.parentNode;
+          }
+        }
+        if ( !cursorName ) {
+          cursorName = "default";
+        }
       }
     }
     else {
@@ -993,6 +1006,9 @@
         if (prevEvent) { // which shoulbe be true always except for 1st
           timeDiff = event.time - prevEvent.time;
         }
+        if ( eventIndex == 2 ) {
+          timeDiff = 1000;
+        }
         screenjs.timeoutId = setTimeout(function(){
           screenjs.playEvent(event);
           playNextEvent(eventIndex+1);
@@ -1056,7 +1072,7 @@
       loadScriptInPlayFrame("init.js");
       loadScriptInPlayFrame("mutation_summary.js");
       loadScriptInPlayFrame("tree_mirror.js");
-      loadScriptInPlayFrame("play.js?a22");
+      loadScriptInPlayFrame("play.js?a23");
 
       // TODO: Wait for play.js to load and then continue
       // imnprove it from simple setTimeout
