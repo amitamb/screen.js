@@ -65,7 +65,12 @@
 
   screenjs.handleDOMMutation = function(data){
     //screenjs.mirror
-    // console.log(data);
+    console.log(data);
+
+    if ( data.f == "initialize" ) {
+      clearPage();
+    }
+
     data.args = JSON.parse(data.args);
     handleMessage(data);
   };

@@ -1,0 +1,36 @@
+<html><head>
+
+<script src="jquery.js"></script>
+<script src="init.js"></script>
+<script src="dom.js"></script>
+<script src="mutation_summary.js"></script>
+<script src="tree_mirror.js"></script>
+<script src="screen.js"></script>
+
+<script>
+  screenjs$(function(){
+    screenjs$("#log").append("Loaded <br />")
+  });
+</script>
+
+<style>
+body {
+  background-color:#44dddd;
+}
+</style>
+
+</head>
+<body>
+  <p>
+    I am on Page1
+  </p>
+  <p>
+    Take me to <a href="page2.html">Page 2</a>
+  </p>
+  <p>
+    Take me to <a href="http://www.amitamb.com.dev-proxy.castbin.com/">www.amitamb.com</a>
+  </p>
+  <div id="log">
+  </div>
+</body>
+</html>

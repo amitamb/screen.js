@@ -1,23 +1,28 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="jquery.js"></script>
     <script>
       $(function(){
         var frame = $("#recordFrame")[0];
+
+        var recording = false;
+
+        var events = [];
+
         $("#record").on("click", function(){
           frame.contentWindow.postMessage({
             type: "screenjsMessage",
             command: "record"
           },"*");
-          // frame.contentWindow.screenjs.record()
+          recording = true;
         });
         $("#stopRecording").on("click", function(){
-          // localStorage.events = JSON.stringify(frame.contentWindow.screenjs.stopRecording());
           frame.contentWindow.postMessage({
             type: "screenjsMessage",
             command: "stopRecording"
           },"*");
+          recording = false;
         });
 
         window.addEventListener("message", receiveMessage, false);
@@ -25,8 +30,21 @@
         function receiveMessage(event)
         {
           if ( event.data && event.data.type && event.data.type == "screenjsMessage" ) {
-            if ( event.data.event && event.data.event == "doneRecording" ) {
-              localStorage.events = JSON.stringify(event.data.data);
+            // TODO: Handle iframes
+            if ( event.data.event && event.data.event == "screenjsLoaded" ) {
+              if ( recording ) {
+                frame.contentWindow.postMessage({
+                  type: "screenjsMessage",
+                  command: "record"
+                },"*");
+              }
+            }
+            else if ( event.data.event && event.data.event == "doneRecording" ) {
+              events = events.concat(event.data.data);
+              localStorage.events = JSON.stringify(events);
+            }
+            else if ( event.data.event && event.data.event == "donePage" ) {
+              events = events.concat(event.data.data);
             }
           }
         }
@@ -39,6 +57,6 @@
     <button id="stopRecording">Stop</button>
     <br />
     <!-- <iframe id="recordFrame" src="http://https.getclever.com.dev-proxy.castbin.com/" style="width:1056px;height:600px;border:1px solid #222;"></iframe> -->
-    <iframe id="recordFrame" src="http://https.news.ycombinator.com.dev-proxy.castbin.com/" style="width:1056px;height:600px;border:1px solid #222;"></iframe>
+    <iframe id="recordFrame" src="http://blog.meanpath.com.dev-proxy.castbin.com/twitter-bootstrap-now-powering-1-percent-of-the-web/" style="width:1056px;height:600px;border:1px solid #222;"></iframe>
   </body>
 </html>

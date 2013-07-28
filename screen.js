@@ -75,10 +75,6 @@
       else if ( nodeName == "a" ) {
         cursorName = "pointer";
       }
-      // detecting only textual nodes
-      else if ( node.childElementCount == 0 && node.childNodes.length == 1 && node.childNodes[0].nodeType == 3 ) {
-        cursorName = "text";
-      }
       else {
         var level = 1;
         var parentNode = node.parentNode;
@@ -93,7 +89,13 @@
           }
         }
         if ( !cursorName ) {
-          cursorName = "default";
+          // detecting only textual nodes
+          if ( node.childElementCount == 0 && node.childNodes.length == 1 && node.childNodes[0].nodeType == 3 ) {
+            cursorName = "text";
+          }
+          else {
+            cursorName = "default";
+          }
         }
       }
     }
@@ -1068,11 +1070,12 @@
     setTimeout(function(){
       //screenjs.playFrame.contentDocument.write(eventData.html);
 
-      loadScriptInPlayFrame("http://code.jquery.com/jquery-1.9.1.min.js");
+      loadScriptInPlayFrame("jquery.js");
       loadScriptInPlayFrame("init.js");
       loadScriptInPlayFrame("mutation_summary.js");
       loadScriptInPlayFrame("tree_mirror.js");
-      loadScriptInPlayFrame("play.js?a23");
+      // TODO: Replace this to avoid reloading
+      loadScriptInPlayFrame("play.js?rnd=" + Number(new Date()) );
 
       // TODO: Wait for play.js to load and then continue
       // imnprove it from simple setTimeout
@@ -1123,6 +1126,26 @@
 
   }
 
+  // when page is unloading send a message to
+  // top window that page is unloading and append the events from current page to events list
+  $(window).on("unload", function(){
+    console.log("Unloading page : " + window.location.href);
+    if ( screenjs.recording ) {
+      var data = screenjs.stopRecording();
+
+      window.top.postMessage({
+        type: "screenjsMessage",
+        event: "doneRecording",
+        data: data
+      },"*");
+    }
+  });
+
   window.screenjs = screenjs;
+
+  window.top.postMessage({
+    type: "screenjsMessage",
+    event: "screenjsLoaded"
+  },"*");
 
 })(window.screenjs$);
