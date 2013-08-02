@@ -10,25 +10,29 @@
   screenjs.base = "";
 
   function showMouseImages(){
-    screenjs.clickCircle = $("<img></img>");
-    screenjs.clickCircle.attr("src", "circle.png").css({
-      position:"absolute",
-      display:"block",
-      left:"-500px",
-      top:"-500px",
-      "z-index":"9999"
-    }).appendTo("body");
-    // page will be already loaded so no need to wait for page load
-    // as play.js is added after some HTML is written to page
 
-    screenjs.mouseCursor = $("<img></img>");
-    screenjs.mouseCursor.attr("src", "mouse4.png").css({
-      position:"absolute",
-      display:"block",
-      left:"-500px",
-      top:"-500px",
-      "z-index":"10000"
-    }).appendTo("body");
+
+    // screenjs.clickCircle = $("<img></img>");
+    // screenjs.clickCircle.attr("src", "circle.png").css({
+    //   position:"absolute",
+    //   display:"block",
+    //   left:"-500px",
+    //   top:"-500px",
+    //   "z-index":"9999"
+    // }).appendTo("body");
+    // // page will be already loaded so no need to wait for page load
+    // // as play.js is added after some HTML is written to page
+
+    // screenjs.mouseCursor = $("<img></img>");
+    // screenjs.mouseCursor.attr("src", "mouse4.png").css({
+    //   position:"absolute",
+    //   display:"block",
+    //   left:"-500px",
+    //   top:"-500px",
+    //   "z-index":"10000"
+    // }).appendTo("body");
+
+
   }
 
   screenjs.mirror = new TreeMirror(document, {
@@ -39,12 +43,16 @@
         return node;
       }
 
-      // if (tagName == 'HEAD') {
-      //   var node = document.createElement('HEAD');
-      //   node.appendChild(document.createElement('BASE'));
-      //   node.firstChild.href = "http://news.ycombinator.com/"; //screenjs.base;
-      //   return node;
-      // }
+      if (tagName == 'HEAD') {
+        var node = document.createElement('HEAD');
+        // <link rel="stylesheet" type="text/css" href="http://www.redditstatic.com/reddit.VBjqx25-S6g.css" media="all">
+        node.appendChild(document.createElement('LINK'));
+        node.firstChild.setAttribute("rel", "stylesheet");
+        node.firstChild.setAttribute("type", "text/css");
+        node.firstChild.setAttribute("media", "all");
+        node.firstChild.href = "http://localhost:9090/reset.css";
+        return node;
+      }
     }
   });
 
@@ -65,7 +73,7 @@
 
   screenjs.handleDOMMutation = function(data){
     //screenjs.mirror
-    console.log(data);
+    // console.log(data);
 
     if ( data.f == "initialize" ) {
       clearPage();
@@ -197,10 +205,13 @@
   // TODO: Consider removing this style
   screenjs.resetTransientStyles = function(eventData){
     var node = screenjs.mirror.deserializeNode(eventData.nodeId);
-    node.style.color = null;
-    node.style.background = null;
-    node.style.textDecoration = null;
-    node.style.border = null;
+
+    node.setAttribute("style", eventData.nodeStyle)
+
+    // node.style.color = null;
+    // node.style.background = null;
+    // node.style.textDecoration = null;
+    // node.style.border = null;
     // TODO: Uncomment when uncommenting relevant portion in screen.js
     // if ( node.parentNode && node.parentNode.attributes["hasHoverStyles"] == true ) {
     //   node.parentNode.style.color = null;

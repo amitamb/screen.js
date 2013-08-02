@@ -447,6 +447,14 @@
 
   var recordSelectionEvents = function(){
 
+    // TODO: Improve it by making it configurable
+    // as it will be useful only when recording with castbin
+    // for general purpose recording like clicktale it could interfere with
+    // default autocomplete value
+    // TODO: Update inputs as they get added through
+    // mutation event handlers
+    $(":input").attr("autocomplete", "off");
+
     // TODO: Decide if we can handle focus events here
     // and even we need to
     // Need more effort on this front
@@ -761,15 +769,17 @@
       if ( shouldProcessHoverEvents(domEvent.target) ) {
         // Firefox Only: 
         // Following timeout is needed only on firefox as style information
-        // for :hover pseudo class doesn't get updated until 
+        // for :hover pseudo class doesn't get updated even
+        // in mouseout event
         (function(domEvent){
           setTimeout(function(){
             var eventData = {
               nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
-              nodeStyle: getHoverComputedStyles(domEvent.target)
+              // nodeStyle: getHoverComputedStyles(domEvent.target)
+              nodeStyle: domEvent.target.getAttribute("style")
             };
-            console.log(domEvent.target);
-            console.log(getHoverComputedStyles(domEvent.target));
+            // console.log(domEvent.target);
+            // console.log(getHoverComputedStyles(domEvent.target));
             appendEvent("mouseout", eventData);
           }, 0);
         })(domEvent);
@@ -782,7 +792,7 @@
       // TODO: There are many complex scanarios which following 
       // code misses. Think of better ways to handle them
 
-      // TODO: Also when using proxy have all external stylesheets proxied through
+      // TODO: Also when using proxy, consider, having all external stylesheets proxied through
       // local DNS address
 
       // background
@@ -794,8 +804,13 @@
         // not working to fix the issue of not having pointer icon
         // set correctly when mouse overs some items
 
-        // (function(domEvent){
-        //   setTimeout(function(domEvent){
+        (function(domEvent){
+          console.log(domEvent);
+          setTimeout(function(){
+
+            if ( domEvent == null ) {
+              console.log("Error would happen!");
+            }
 
             // TODO: Implement better way of handling parent to
             // child hovering of events
@@ -803,6 +818,8 @@
               nodeId: screenjs.mirrorClient.serializeNode(domEvent.target),
               nodeStyle: getHoverComputedStyles(domEvent.target)
             };
+
+            console.log(eventData);
 
             // Task of following code is to decide whether parent got called for hover event
             // before current target got called for mouseover
@@ -829,8 +846,9 @@
             // }
 
             appendEvent("mouseover", eventData);
-        //   }, 0);
-        // })(domEvent);
+
+          }, 0);
+        })(domEvent);
       }
     });
   };
@@ -848,7 +866,7 @@
     else if ( checkEventType(event, "mouseout") ) {
       // console.log(event);
       changeMouseCursor("default");
-      getPlayFrameScreenjs().setTransientStyles(event.data);
+      getPlayFrameScreenjs().resetTransientStyles(event.data);
     }
   };
 
@@ -1070,12 +1088,14 @@
     setTimeout(function(){
       //screenjs.playFrame.contentDocument.write(eventData.html);
 
-      loadScriptInPlayFrame("jquery.js");
-      loadScriptInPlayFrame("init.js");
-      loadScriptInPlayFrame("mutation_summary.js");
-      loadScriptInPlayFrame("tree_mirror.js");
-      // TODO: Replace this to avoid reloading
-      loadScriptInPlayFrame("play.js?rnd=" + Number(new Date()) );
+      // loadScriptInPlayFrame("jquery.js");
+      // loadScriptInPlayFrame("init.js");
+      // loadScriptInPlayFrame("mutation_summary.js");
+      // loadScriptInPlayFrame("tree_mirror.js");
+      // // TODO: Replace this to avoid reloading
+      // loadScriptInPlayFrame("play.js?rnd=" + Number(new Date()) );
+
+      screenjs.playFrame.src = "blank.html";
 
       // TODO: Wait for play.js to load and then continue
       // imnprove it from simple setTimeout
