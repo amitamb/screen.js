@@ -780,6 +780,8 @@
             };
             // console.log(domEvent.target);
             // console.log(getHoverComputedStyles(domEvent.target));
+            console.log("mouseout from " + domEvent.target);
+            console.log(eventData);
             appendEvent("mouseout", eventData);
           }, 0);
         })(domEvent);
@@ -805,7 +807,6 @@
         // set correctly when mouse overs some items
 
         (function(domEvent){
-          console.log(domEvent);
           setTimeout(function(){
 
             if ( domEvent == null ) {
@@ -819,6 +820,7 @@
               nodeStyle: getHoverComputedStyles(domEvent.target)
             };
 
+            console.log("mouseover on " + domEvent.target);
             console.log(eventData);
 
             // Task of following code is to decide whether parent got called for hover event
@@ -866,6 +868,7 @@
     else if ( checkEventType(event, "mouseout") ) {
       // console.log(event);
       changeMouseCursor("default");
+      console.log(event);
       getPlayFrameScreenjs().resetTransientStyles(event.data);
     }
   };
@@ -1095,7 +1098,7 @@
       // // TODO: Replace this to avoid reloading
       // loadScriptInPlayFrame("play.js?rnd=" + Number(new Date()) );
 
-      screenjs.playFrame.src = "blank.html";
+      screenjs.playFrame.src = "blank.html?1";
 
       // TODO: Wait for play.js to load and then continue
       // imnprove it from simple setTimeout

@@ -201,7 +201,6 @@
     return node;
   };
 
-
   // TODO: Consider removing this style
   screenjs.resetTransientStyles = function(eventData){
     var node = screenjs.mirror.deserializeNode(eventData.nodeId);
