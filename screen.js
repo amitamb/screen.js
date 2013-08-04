@@ -1,5 +1,10 @@
 // screen.js
 
+// we are not in a proxy so
+if ( window.screenjs$ == null ) {
+  window.screenjs$ = $;
+}
+
 (function($){
 
   var screenjs = {};
@@ -12,6 +17,7 @@
   screenjs.playing = false;
 
   screenjs.debug = true;
+
 
   // this is used while recording and
   // playing as well
@@ -130,7 +136,7 @@
     // }
 
     cursorToNodeMap[cursorName] = $("<img></img>");
-    return cursorToNodeMap[cursorName].attr("src", "cursors/mac/"+cursorName+".png").css({
+    return cursorToNodeMap[cursorName].attr("src", "/assets/cursors/mac/"+cursorName+".png").css({
       position:"absolute",
       display:"block",
       left:left+"px",
@@ -174,7 +180,7 @@
 
   function showMouseImages(){
     screenjs.clickCircle = $("<img></img>");
-    screenjs.clickCircle.attr("src", "cursors/extra/circle.png").css({
+    screenjs.clickCircle.attr("src", "/assets/cursors/extra/circle.png").css({
       position:"absolute",
       display:"block",
       left:"-500px",
@@ -960,6 +966,8 @@
     // or find a better way to handle such values
     $(":input").change();
 
+    $(document).trigger("scroll");
+
     screenjs.recording = true;
   };
 
@@ -1041,14 +1049,14 @@
 
     playNextEvent(0);
     
-    console.log("Interval created ID: " + screenjs.intervalId);
+    // console.log("Interval created ID: " + screenjs.intervalId);
   };
 
   screenjs.play = function(options){
 
     screenjs.playerContainer = options.playerContainer;
 
-    $playerContainer = $(playerContainer);
+    $playerContainer = $(screenjs.playerContainer);
 
     $playerContainer.html("<div><iframe></iframe></div>");
 
@@ -1098,11 +1106,12 @@
       // // TODO: Replace this to avoid reloading
       // loadScriptInPlayFrame("play.js?rnd=" + Number(new Date()) );
 
-      screenjs.playFrame.src = "blank.html?1";
+      // TODO: Accept it from config
+      screenjs.playFrame.src = "/blank.html?1";
 
       // TODO: Wait for play.js to load and then continue
       // imnprove it from simple setTimeout
-      setTimeout(function(){
+      screenjs.playFrame.onload = function(){
 
         var t = eventData.base;
         getPlayFrameScreenjs().base = eventData.base
@@ -1112,7 +1121,7 @@
         screenjs.playing = true;
 
         screenjs.startEventLoop();
-      }, 300);
+      };//, 300);
     }, 10)
   };
 
